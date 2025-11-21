@@ -230,7 +230,7 @@ Click nbfs://nbhost/SystemFileSystem/Templates/Other/html.html to edit this temp
                     $("#ddlPais").change(function () {
             $.ajax({
             type: "GET",
-                    url: "/usuario/estado/" + $("#ddlPais").val(),
+                    url: "http://localhost:8080/api/estado/estados/" + $("#ddlPais").val(),
                     datatype: "json",
                     success: function (data, textStatus, jqXHR) {
                     $("#ddlEstado").prop("disabled", false)
@@ -240,7 +240,7 @@ Click nbfs://nbhost/SystemFileSystem/Templates/Other/html.html to edit this temp
                     $("#ddlMunicipio").empty();
                     $("#ddlEstado").empty();
                     $("#ddlEstado").append("<option value=0 selected>Selecciona un estado</option>");
-                    $.each(data.objects, function (i, estado) {
+                    $.each(data.object, function (i, estado) {
                     $("#ddlEstado").append("<option value = " + estado.idEstado + " >" + estado.nombreEstado + "</option>")
                     });
                     },
@@ -253,7 +253,7 @@ Click nbfs://nbhost/SystemFileSystem/Templates/Other/html.html to edit this temp
                     $("#ddlEstado").change(function () {
             $.ajax({
             type: "GET",
-                    url: "/usuario/municipio/" + $("#ddlEstado").val(),
+                    url: "http://localhost:8080/api/municipio/municipios/" + $("#ddlEstado").val(),
                     datatype: "json",
                     success: function (data, textStatus, jqXHR) {
                     $("#ddlMunicipio").prop("disabled", false)
@@ -261,7 +261,7 @@ Click nbfs://nbhost/SystemFileSystem/Templates/Other/html.html to edit this temp
                     $("#ddlColonia").prop("disabled", true);
                     $("#ddlColonia").empty();
                     $("#ddlMunicipio").append("<option value=0 selected>Selecciona un Municipio</option>");
-                    $.each(data.objects, function (i, municipio) {
+                    $.each(data.object, function (i, municipio) {
                     $("#ddlMunicipio").append('<option th:field="*{Direcciones[0].Colonia.IdColonia}" value= ' + municipio.idMunicipio + '>' + municipio.nombreMunicipio + '</option>')
                     });
                     },
@@ -274,13 +274,13 @@ Click nbfs://nbhost/SystemFileSystem/Templates/Other/html.html to edit this temp
                     $("#ddlMunicipio").change(function () {
             $.ajax({
             type: "GET",
-                    url: "/usuario/colonia/" + $("#ddlMunicipio").val(),
+                    url: "http://localhost:8080/api/colonia/colonias/" + $("#ddlMunicipio").val(),
                     datatype: "json",
                     success: function (data, textStatus, jqXHR) {
                     $("#ddlColonia").prop("disabled", false)
                             $("#ddlColonia").empty();
                     $("#ddlColonia").append("<option value=0 selected   >Seleccione una Colonia</option>")
-                            $.each(data.objects, function (i, colonia) {
+                            $.each(data.object, function (i, colonia) {
                             $("#ddlColonia").append("<option value=" + colonia.idColonia + ">" + colonia.nombreColonia + "</option>")
                             });
                     },
@@ -293,7 +293,7 @@ Click nbfs://nbhost/SystemFileSystem/Templates/Other/html.html to edit this temp
                     $("#ddlColonia").change(function () {
             $.ajax({
             type: "GET",
-                    url: "/usuario/colonia?" + "nombreColonia=" + $("#ddlColonia option:selected").text() + "&idMunicipio=" + $("#ddlMunicipio").val(),
+                    url: "http://localhost:8080/api/colonia/colonias?" + "nombreColonia=" + $("#ddlColonia option:selected").text() + "&idMunicipio=" + $("#ddlMunicipio").val(),
                     datatype: "json",
                     success: function (data, textStatus, jqXHR) {
                     $("#codigoPostal").empty();
@@ -347,19 +347,19 @@ Click nbfs://nbhost/SystemFileSystem/Templates/Other/html.html to edit this temp
             var idDireccion = $(this).data("id");
             $.ajax({
             type: 'GET',
-                    url: '/usuario/direccionById/' + idDireccion,
+                    url: 'http://localhost:8080/api/direcciones/direccion/' + idDireccion,
                     dataType: 'json',
                     success: function(data) {
                     var d = data.object;
                     $('#direccionId').val(d.idDireccion);
-                    $('#ddlPais').val(d.Colonia.Municipio.Estado.Pais.idPais);
-                    cargarEstados(d.Colonia.Municipio.Estado.Pais.idPais, function() {
-                    $("#ddlEstado").val(d.Colonia.Municipio.Estado.idEstado);
-                    cargarMunicipios(d.Colonia.Municipio.Estado.idEstado, function() {
-                    $("#ddlMunicipio").val(d.Colonia.Municipio.idMunicipio);
-                    cargarColonias(d.Colonia.Municipio.idMunicipio, function() {
-                    $("#ddlColonia").val(d.Colonia.idColonia);
-                    $("#codigoPostal").val(d.Colonia.codigoPostal);
+                    $('#ddlPais').val(d.ColoniaJPA.MunicipioJPA.EstadoJPA.PaisJPA.idPais);
+                    cargarEstados(d.ColoniaJPA.MunicipioJPA.EstadoJPA.PaisJPA.idPais, function() {
+                    $("#ddlEstado").val(d.ColoniaJPA.MunicipioJPA.EstadoJPA.idEstado);
+                    cargarMunicipios(d.ColoniaJPA.MunicipioJPA.EstadoJPA.idEstado, function() {
+                    $("#ddlMunicipio").val(d.ColoniaJPA.MunicipioJPA.idMunicipio);
+                    cargarColonias(d.ColoniaJPA.MunicipioJPA.idMunicipio, function() {
+                    $("#ddlColonia").val(d.ColoniaJPA.idColonia);
+                    $("#codigoPostal").val(d.ColoniaJPA.codigoPostal);
                     });
                     });
                     });
@@ -414,13 +414,13 @@ Click nbfs://nbhost/SystemFileSystem/Templates/Other/html.html to edit this temp
                     function cargarEstados(idPais, callback) {
                     $.ajax({
                     type: "GET",
-                            url: "/usuario/estado/" + idPais,
+                            url: "http://localhost:8080/api/estado/estados/" + idPais,
                             datatype: "json",
                             success: function (data, textStatus, jqXHR) {
                             $("#ddlEstado").prop("disabled", false);
                             $("#ddlEstado").empty();
                             $("#ddlEstado").append("<option value=0 selected>Selecciona un estado</option>");
-                            $.each(data.objects, function (i, estado) {
+                            $.each(data.object, function (i, estado) {
                             $("#ddlEstado").append("<option value = " + estado.idEstado + " >" + estado.nombreEstado + "</option>")
                             });
                             if (callback) callback();
@@ -434,13 +434,13 @@ Click nbfs://nbhost/SystemFileSystem/Templates/Other/html.html to edit this temp
             function cargarMunicipios(idEstado, callback) {
             $.ajax({
             type: "GET",
-                    url: "/usuario/municipio/" + idEstado,
+                    url: "http://localhost:8080/api/municipio/municipios/" + idEstado,
                     datatype: "json",
                     success: function (data, textStatus, jqXHR) {
                     $("#ddlMunicipio").prop("disabled", false)
                             $("#ddlMunicipio").empty();
                     $("#ddlMunicipio").append("<option value=0 selected>Selecciona un Municipio</option>");
-                    $.each(data.objects, function (i, municipio) {
+                    $.each(data.object, function (i, municipio) {
                     $("#ddlMunicipio").append('<option th:field="*{Direcciones[0].Colonia.IdColonia}" value= ' + municipio.idMunicipio + '>' + municipio.nombreMunicipio + '</option>')
                     });
                     if (callback) callback();
@@ -454,13 +454,13 @@ Click nbfs://nbhost/SystemFileSystem/Templates/Other/html.html to edit this temp
             function cargarColonias(idMunicipio, callback) {
             $.ajax({
             type: "GET",
-                    url: "/usuario/colonia/" + idMunicipio,
+                    url: "http://localhost:8080/api/colonia/colonias/" + idMunicipio,
                     datatype: "json",
                     success: function (data, textStatus, jqXHR) {
                     $("#ddlColonia").prop("disabled", false)
                             $("#ddlColonia").empty();
                     $("#ddlColonia").append("<option value=0 selected   >Seleccione una Colonia</option>")
-                            $.each(data.objects, function (i, colonia) {
+                            $.each(data.object, function (i, colonia) {
                             $("#ddlColonia").append("<option value=" + colonia.idColonia + ">" + colonia.nombreColonia + "</option>")
                             });
                     if (callback) callback();
@@ -474,7 +474,7 @@ Click nbfs://nbhost/SystemFileSystem/Templates/Other/html.html to edit this temp
             function cargarCodigoPostal(nombreColonia, idMunicipio, callback) {
             $.ajax({
             type: "GET",
-                    url: "/usuario/colonia?" + "nombreColonia=" + nombreColonia + "&idMunicipio=" + idMunicipio,
+                    url: "http://localhost:8080/api/colonia/colonias?" + nombreColonia + "&idMunicipio=" + idMunicipio,
                     datatype: "json",
                     success: function (data, textStatus, jqXHR) {
                     $("#codigoPostal").val(data.object);
