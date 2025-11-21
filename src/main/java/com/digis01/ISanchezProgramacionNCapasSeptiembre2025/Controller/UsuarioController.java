@@ -509,42 +509,46 @@ public class UsuarioController {
 //            }
 //            return "UsuarioForm";
 //        }
-     
-            
-            RestTemplate restTemplate = new RestTemplate();
-            
-            ObjectMapper mapper = new ObjectMapper();
-            String usuarioJSON = mapper.writeValueAsString(usuario);
+        RestTemplate restTemplate = new RestTemplate();
 
-            MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
+        MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
 
-            body.add("usuario", new HttpEntity<>(usuarioJSON));
-                        
-            if (imagenFile != null) {
-                try {
-                    ByteArrayResource fileAsResource = new ByteArrayResource(imagenFile.getBytes()){
-                        @Override
-                        public String getFilename(){
-                            return imagenFile.getOriginalFilename();
-                        }
-                    };
-                    body.add("imagenFile", fileAsResource);
-                } catch (IOException ex) {
-                    java.util.logging.Logger.getLogger(UsuarioController.class.getName()).log(Level.SEVERE, null, ex);
-                }
+        HttpHeaders jsonHeaders = new HttpHeaders();
+
+        jsonHeaders.setContentType(MediaType.APPLICATION_JSON);
+
+        HttpEntity<Usuario> usuarioEntity = new HttpEntity<>(usuario, jsonHeaders);
+
+        body.add("usuario", usuarioEntity);
+
+        if (imagenFile != null) {
+            try {
+                ByteArrayResource fileAsResource = new ByteArrayResource(imagenFile.getBytes()) {
+                    @Override
+                    public String getFilename() {
+                        return imagenFile.getOriginalFilename();
+                    }
+                };
+
+                HttpHeaders fileHeaders = new HttpHeaders();
+                fileHeaders.setContentType(MediaType.MULTIPART_FORM_DATA);
+
+                body.add("imagenFile", new HttpEntity<>(fileAsResource, fileHeaders));
+            } catch (IOException ex) {
+                java.util.logging.Logger.getLogger(UsuarioController.class.getName()).log(Level.SEVERE, null, ex);
             }
-            
-            HttpHeaders headers = new HttpHeaders();
-            headers.setContentType(MediaType.MULTIPART_FORM_DATA);
-            
-            HttpEntity<MultiValueMap<String, Object>> request = new HttpEntity<>(body, headers);
-            
-            ResponseEntity<Result> responseEntity = restTemplate.exchange(
-                    urlBase + "/api/usuarios/usuario",
-                    HttpMethod.POST,
-                    request,
-                    Result.class);
+        }
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.MULTIPART_FORM_DATA);
         
+        HttpEntity<MultiValueMap<String, Object>> requestEntity = new HttpEntity<>(body, headers);
+
+        ResponseEntity<Result> responseEntity = restTemplate.exchange(
+                urlBase + "/api/usuarios/usuario",
+                HttpMethod.POST,
+                requestEntity,
+                Result.class);
 
         if (responseEntity.getStatusCode().value() == 201) {
             redirectAttributes.addFlashAttribute("success", "EL usuario" + usuario.getUserName() + "Se creo con exito");

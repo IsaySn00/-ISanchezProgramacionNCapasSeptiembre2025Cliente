@@ -11,7 +11,7 @@
     <groupId>com.digis01</groupId>
     <artifactId>ISanchezProgramacionNCapasSeptiembre2025</artifactId>
     <version>0.0.1-SNAPSHOT</version>
-    <name>ISanchezProgramacionNCapasSeptiembre2025</name>
+    <name>ISanchezProgramacionNCapasSeptiembre2025Client</name>
     <description>Aplicativo para la construccion de Spring</description>
     <url/>
     <licenses>
