@@ -627,7 +627,7 @@ public class UsuarioController {
         RestTemplate restTemplate = new RestTemplate();
 
         restTemplate.setRequestFactory(new HttpComponentsClientHttpRequestFactory());
-        
+
         MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
 
         HttpHeaders jsonHeaders = new HttpHeaders();
@@ -692,61 +692,54 @@ public class UsuarioController {
 //
 //        return "redirect:/usuario/indexUsuario";
 //    }
-//
-//    @PostMapping("/addDireccion")
-//    public String addDireccionToUser(@ModelAttribute("Direccion") Direccion direccion, @RequestParam int usuarioId, RedirectAttributes redirectAttributes) {
-//        Result result = direccionJPADAOImplementation.AddDireccion(direccion, usuarioId);
-//
-//        if (result.correct) {
-//            redirectAttributes.addFlashAttribute("successMessage", "La dirección se agregó con exito");
-//            redirectAttributes.addFlashAttribute("iconModal", "success");
-//        } else {
-//            redirectAttributes.addFlashAttribute("successMessage", "La dirección no se ha podido agregar");
-//            redirectAttributes.addFlashAttribute("iconModal", "error");
-//        }
-//
-//        return "redirect:/usuario/detail/" + usuarioId;
-//    }
 
-//    @PostMapping("/updateDireccion")
-//    public String updateDireccion(@ModelAttribute("Direccion") Direccion direccion, @RequestParam int usuarioId, RedirectAttributes redirectAttributes) {
-//        Result result = direccionJPADAOImplementation.UpdateDireccion(direccion, usuarioId);
-//
-//        if (result.correct) {
-//            redirectAttributes.addFlashAttribute("successMessage", "La dirección se actualizó con exito");
-//            redirectAttributes.addFlashAttribute("iconModal", "success");
-//        } else {
-//            redirectAttributes.addFlashAttribute("successMessage", "La dirección no se ha podido actualizar");
-//            redirectAttributes.addFlashAttribute("iconModal", "error");
-//        }
-//
-//        return "redirect:/usuario/detail/" + usuarioId;
-//    }
-//
-//    @PostMapping("actionDireccion/{idUsuario}")
-//    public String ActionDireccion(@ModelAttribute("Direccion") Direccion direccion,
-//            @PathVariable int idUsuario,
-//            RedirectAttributes redirectAttributes) {
-//        Result result = new Result();
-//
-//        if (direccion.getIdDireccion() > 0) {
-//            result = direccionJPADAOImplementation.UpdateDireccion(direccion, idUsuario);
-//        } else {
-//            result = direccionJPADAOImplementation.AddDireccion(direccion, idUsuario);
-//        }
-//
-//        if (result.correct) {
-//            redirectAttributes.addFlashAttribute("successMessage",
-//                    direccion.getIdDireccion() != 0 ? "La dirección se actualizó con éxito" : "La dirección se agregó con éxito");
-//            redirectAttributes.addFlashAttribute("iconModal", "success");
-//        } else {
-//            redirectAttributes.addFlashAttribute("successMessage",
-//                    direccion.getIdDireccion() != 0 ? "La dirección no se pudo actualizar" : "La dirección no se pudo agregar");
-//            redirectAttributes.addFlashAttribute("iconModal", "error");
-//        }
-//
-//        return "redirect:/usuario/detail/" + idUsuario;
-//    }
+    @PostMapping("actionDireccion/{idUsuario}")
+    public String ActionDireccion(@ModelAttribute("Direccion") Direccion direccion,
+            @PathVariable int idUsuario,
+            RedirectAttributes redirectAttributes) {
+
+        RestTemplate restTemplate = new RestTemplate();
+
+        MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
+
+        HttpHeaders jsonHeaders = new HttpHeaders();
+
+        jsonHeaders.setContentType(MediaType.APPLICATION_JSON);
+
+        HttpEntity<Direccion> direccionEntity = new HttpEntity<>(direccion, jsonHeaders);
+
+        body.add("direccion", direccionEntity);
+
+        if (direccion.getIdDireccion() > 0) {
+            ResponseEntity<Result> responseEntity = restTemplate.exchange(urlBase + "/api/direcciones/direccion?idUsuario=" + idUsuario,
+                    HttpMethod.PUT,
+                    direccionEntity,
+                    Result.class);
+
+            if (responseEntity.getStatusCode().value() == 202) {
+                redirectAttributes.addFlashAttribute("successMessage", "La dirección se actualizó con éxito");
+                redirectAttributes.addFlashAttribute("iconModal", "success");
+            } else {
+                redirectAttributes.addFlashAttribute("successMessage", "La dirección no se pudo actualizar");
+                redirectAttributes.addFlashAttribute("iconModal", "error");
+            }
+        } else {
+            ResponseEntity<Result> responseEntity = restTemplate.exchange(urlBase + "/api/direcciones/direccion?idUsuario=" + idUsuario,
+                    HttpMethod.POST,
+                    direccionEntity,
+                    Result.class);
+
+            if (responseEntity.getStatusCode().value() == 201) {
+                redirectAttributes.addFlashAttribute("successMessage", "La dirección se agregó con éxito");
+                redirectAttributes.addFlashAttribute("iconModal", "success");
+            } else {
+                redirectAttributes.addFlashAttribute("successMessage", "La dirección no se pudo agregar");
+                redirectAttributes.addFlashAttribute("iconModal", "error");
+            }
+        }
+        
+        return "redirect:/usuario/detail/" + idUsuario;
+    }
 //
 //    @PostMapping("/deleteDireccion/{idDireccion}")
 //    public String deleteDireccion(@PathVariable("idDireccion") int idDireccion, @RequestParam("usuarioId") int usuarioId, RedirectAttributes redirectAttributes) {
