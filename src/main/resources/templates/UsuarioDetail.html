@@ -388,8 +388,8 @@ Click nbfs://nbhost/SystemFileSystem/Templates/Other/html.html to edit this temp
             }).then((result) => {
             if (result.isConfirmed) {
             $.ajax({
-            type: 'POST',
-                    url: `/usuario/deleteDireccion/${idDireccion}?usuarioId=${usuarioId}`,
+            type: 'DELETE',
+                    url: `http://localhost:8080/api/direcciones/direccion/${idDireccion}`,
                     success: function () {
                     btn.closest('tr').fadeOut(300, function () {
                     $(this).remove();
