@@ -35,8 +35,8 @@ Click nbfs://nbhost/SystemFileSystem/Templates/Other/html.html to edit this temp
             }).then((result) => {
             if (result.isConfirmed){
             $.ajax({
-            type: 'POST',
-                    url: `/usuario/deleteUsuario/${idUsuario}`,
+            type: 'DELETE',
+                    url: `http://localhost:8080/api/usuarios/deleteUsuario/${idUsuario}`,
                     success: function () {
                     btn.closest('tr').fadeOut(300, function () {
                         $(this).remove();
