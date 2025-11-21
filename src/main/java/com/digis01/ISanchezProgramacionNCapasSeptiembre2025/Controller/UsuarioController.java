@@ -51,6 +51,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -431,16 +432,26 @@ public class UsuarioController {
 //        return errorLista;
 //    }
 //
-//    @GetMapping("detail/{idUsuario}")
-//    public String Detail(@PathVariable("idUsuario") int idUsuario, Model model) {
-//        Result result = usuarioJPADAOImplementation.GetById(idUsuario);
-//
-//        Usuario usuario = (Usuario) result.object;
-//
-//        model.addAttribute("direccion", new Direccion());
-//        model.addAttribute("usuario", result.object);
-//        model.addAttribute("roles", rolJPADAOImplementation.GetAll().objects);
-//        model.addAttribute("paises", paisJPADAOImplementation.GetAll().objects);
+
+    @GetMapping("detail/{idUsuario}")
+    public String Detail(@PathVariable("idUsuario") int idUsuario, Model model) {
+
+        RestTemplate restTemplate = new RestTemplate();
+
+        ResponseEntity<Result<Usuario>> responseEntity = restTemplate.exchange(urlBase + "/api/usuarios/usuario/" + idUsuario,
+                HttpMethod.GET,
+                HttpEntity.EMPTY,
+                new ParameterizedTypeReference<Result<Usuario>>() {
+        });
+
+        if (responseEntity.getStatusCode().value() == 200) {
+            Result result = responseEntity.getBody();
+            model.addAttribute("usuario", result.object);
+        }
+
+        model.addAttribute("direccion", new Direccion());
+        model.addAttribute("roles", GetRoles().object);
+        model.addAttribute("paises", GetPaises().object);
 //        if (usuario.Direcciones.get(0).Colonia.Municipio.Estado.Pais.getIdPais() > 0) {
 //            model.addAttribute("estados", estadoJPADAOImplementation.GetAll(usuario.Direcciones.get(0).Colonia.Municipio.Estado.Pais.getIdPais()).objects);
 //            if (usuario.Direcciones.get(0).Colonia.Municipio.Estado.Pais.getIdPais() > 0) {
@@ -450,9 +461,9 @@ public class UsuarioController {
 //                }
 //            }
 //        }
-//
-//        return "UsuarioDetail";
-//    }
+
+        return "UsuarioDetail";
+    }
 //
 
     @GetMapping("add")
@@ -462,14 +473,17 @@ public class UsuarioController {
 
         model.addAttribute("Usuario", usuario);
 
+        model.addAttribute("paises", GetPaises().object);
+
+        model.addAttribute("roles", GetRoles().object);
+
+        return "UsuarioForm";
+    }
+
+    public Result GetPaises() {
         RestTemplate restTemplate = new RestTemplate();
 
-        ResponseEntity<Result<List<Rol>>> responseEntityRol = restTemplate.exchange(
-                urlBase + "/api/rol/roles",
-                HttpMethod.GET,
-                HttpEntity.EMPTY,
-                new ParameterizedTypeReference<Result<List<Rol>>>() {
-        });
+        Result resultPais = new Result();
 
         ResponseEntity<Result<List<Pais>>> responseEntityPais = restTemplate.exchange(
                 urlBase + "/api/pais/paises",
@@ -478,15 +492,30 @@ public class UsuarioController {
                 new ParameterizedTypeReference<Result<List<Pais>>>() {
         });
 
-        if (responseEntityRol.getStatusCode().value() == 200 && responseEntityPais.getStatusCode().value() == 200) {
-            Result resultRol = responseEntityRol.getBody();
-            model.addAttribute("roles", resultRol.object);
-
-            Result resultPais = responseEntityPais.getBody();
-            model.addAttribute("paises", resultPais.object);
+        if (responseEntityPais.getStatusCode().value() == 200) {
+            resultPais = responseEntityPais.getBody();
         }
 
-        return "UsuarioForm";
+        return resultPais;
+    }
+
+    public Result GetRoles() {
+        RestTemplate restTemplate = new RestTemplate();
+
+        Result resultRol = new Result();
+
+        ResponseEntity<Result<List<Rol>>> responseEntityRol = restTemplate.exchange(
+                urlBase + "/api/rol/roles",
+                HttpMethod.GET,
+                HttpEntity.EMPTY,
+                new ParameterizedTypeReference<Result<List<Rol>>>() {
+        });
+
+        if (responseEntityRol.getStatusCode().value() == 200) {
+            resultRol = responseEntityRol.getBody();
+        }
+
+        return resultRol;
     }
 
     @PostMapping("add")
@@ -541,7 +570,7 @@ public class UsuarioController {
 
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.MULTIPART_FORM_DATA);
-        
+
         HttpEntity<MultiValueMap<String, Object>> requestEntity = new HttpEntity<>(body, headers);
 
         ResponseEntity<Result> responseEntity = restTemplate.exchange(
@@ -560,23 +589,34 @@ public class UsuarioController {
 
         return "redirect:/usuario/indexUsuario";
     }
-//
-//    @PostMapping("/detail")
-//    public String updateUsuario(@ModelAttribute("usuario") Usuario usuario,
-//            RedirectAttributes redirectAttributes) {
-//
-//        Result result = usuarioJPADAOImplementation.UpdateUsuario(usuario);
-//
-//        if (result.correct) {
-//            redirectAttributes.addFlashAttribute("successMessage", "EL usuario editó con exito");
-//            redirectAttributes.addFlashAttribute("iconModal", "success");
-//        } else {
-//            redirectAttributes.addFlashAttribute("successMessage", "EL usuario no se ha podido editar");
-//            redirectAttributes.addFlashAttribute("iconModal", "error");
-//        }
-//
-//        return "redirect:/usuario/detail/" + usuario.getIdUsuario();
-//    }
+
+    @PutMapping("/detail")
+    public String updateUsuario(@ModelAttribute("usuario") Usuario usuario,
+            RedirectAttributes redirectAttributes) {
+        
+        RestTemplate restTemplate = new RestTemplate();
+        
+        HttpHeaders httpHeaders = new HttpHeaders();
+        httpHeaders.setContentType(MediaType.APPLICATION_JSON);
+        
+        HttpEntity<Usuario> request = new HttpEntity<>(usuario, httpHeaders);
+        
+        ResponseEntity<Result> responseEntity = restTemplate.exchange(urlBase + "/api/usuarios/updateUsuario",
+                HttpMethod.PUT,
+                request,
+                Result.class);
+        
+        
+        if (responseEntity.getStatusCode().value() == 202) {
+            redirectAttributes.addFlashAttribute("successMessage", "EL usuario editó con exito");
+            redirectAttributes.addFlashAttribute("iconModal", "success");
+        } else {
+            redirectAttributes.addFlashAttribute("successMessage", "EL usuario no se ha podido editar");
+            redirectAttributes.addFlashAttribute("iconModal", "error");
+        }
+
+        return "redirect:/usuario/detail/" + usuario.getIdUsuario();
+    }
 //
 //    @PostMapping("updateImgUsuario")
 //    public String UpdateImgUsuario(@ModelAttribute("usuario") Usuario usuario,
