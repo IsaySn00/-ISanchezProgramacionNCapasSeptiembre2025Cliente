@@ -1,0 +1,10 @@
+Carlos|Ramirez|Lopez|Car123$Ram!|1990-05-14|A|2025-10-01|carlosr|carlos.ramirez@example.com|M|5551234567|5519876543|RALC900514HDFMZN01|1
+Mariana|Santos|Diaz|Mari@2024!|1995-08-22|A|2025-09-15|mari_santos|mariana.santos@example.com|F|5541239876|5521239876|SADM950822MDFNZN02|2
+Jorge|Lopez|Martinez|Jorg#2023@|1988-03-05|A|2025-08-20|jorgeLM|jorge.lopez@example.com|M|5533219988|5516549874|LOMJ880305HDFMRG03|3
+Lucia|Perez|Hernandez|LuciaP@ss1!|1992-11-19|A|2025-10-15|luciaPH|lucia.perez@example.com|F|5557896543|5559873210|PEHL921119MDFNRD04|1
+Rafael|Gomez|Vega|Raf@el2025#|1985-02-10|A|2025-09-01|rafaGV|rafael.gomez@example.com|M|5542226677|5533345566|GOVR850210HDFVGA05|2
+Sofia|Cruz|Morales|Sofi@#2024|1997-06-30|A|2025-09-25|sofiaCM|sofia.cruz@example.com|F|5556667788|5543332211|CRMS970630MDFNRS06|3
+Hector|Mendoza|Rojas|Hect0r@Dev!|1991-01-28|A|2025-07-12|hectorMR|hector.mendoza@example.com|M|5567891234|5529876543|MERH910128HDFNJS07|1
+Daniela|Rios|Flores|Dani!Rios9|1998-09-15|A|2025-10-03|daniRF|daniela.rios@example.com|F|5571234455|5558762345|RIFD980915MDFNRL08|2
+Miguel|Torres|Garcia|Migu3l@T!|1983-12-02|A|2025-08-09|miguelTG|miguel.torres@example.com|M|5587654321|5512345678|TOGM831202HDFRLC09|3
+Ana|Luna|Cordero|AnaLun@#1|1996-04-11|A|2025-10-25|anaLC|ana.luna@example.com|F|5596541234|5532121234|LUCA960411MDFNRN10|1

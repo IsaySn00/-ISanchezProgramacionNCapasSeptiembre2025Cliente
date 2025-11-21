@@ -1,0 +1,2 @@
+Carlos|Ramirez|Lopez|Car123$Ram!|1990-05-14|A|2025-10-01|carlosr|carlos.ramirez@example.com|M|5551234567|5519876543|RALC900514HDFMZN01|1
+Mariana|Santos|Diaz|Mari@2024!|1995-08-22|A|2025-09-15|mari_santos|mariana.santos@example.com|F|5541239876|5521239876|SADM950822MDFNZN02|2

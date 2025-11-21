@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<!--
+Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
+Click nbfs://nbhost/SystemFileSystem/Templates/Other/html.html to edit this template
+-->
+<html xmlns:th="http://www.thymeleaf.org" 
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{index}">
+    <head>
+        <title>TODO supply a title</title>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    </head>
+    <body layout:fragment="contenido">
+        <script th:if="${success}" th:inline="javascript">
+            Swal.fire({
+            icon: [[${icon}]],
+                    title: [[${success}]],
+            });
+        </script>
+        <div class="row container-fluid">
+            <div class="col-12 card w-50 mt-4 mx-auto">
+                <div class="card-body row">
+                    <form th:action="@{cargaMasiva}" id="cargaMasiva" method="post" enctype="multipart/form-data">
+                        <div class="col-12 row">
+                            <div class="col-6">
+                                <button type="button" class="btn btn-secondary btnTxt me-5">Txt</button>
+                                <button type="button" class="btn btn-secondary btnXLSX">Excel (XLSX)</button>
+                            </div>
+                            <div class="col-6 my-auto">
+                                <input type="file" name="archivo" class="form-control" id="inputFile" style="display: none;">
+                            </div>   
+                        </div>
+                        <div class="col-12 mt-3">
+                            <button id="btnSubmit" type="submit" class="btn btn-primary" style="display: none;">Subir archivo</button>
+                        </div>
+                        <div class="col-12 mt-3" th:if="${successValidation}">
+                            <a class="btn btn-success" th:href="@{cargaMasiva/procesar}">Procesar</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            <div th:if="${errores}" class="col-12">
+                <table class="table container">
+                    <thead>
+                        <tr>
+                            <th scope="col">Linea</th>
+                            <th scope="col">Campo</th>
+                            <th scope="col">Descripción</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:each="error: ${errores}">
+                            <th scope="col" th:text="${error.linea}"></th>
+                            <th scope="col" th:text="${error.campo}"></th>
+                            <th scope="col" th:text="${error.descripcion}"></th>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <!--        <script th:if="${successValidation}">
+                    Swal.fire({
+                        title: "Do you want to save the changes?",
+                        showCancelButton: true,
+                        confirmButtonText: "Save",
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            Swal.fire("Saved!", "", "success");
+                        }
+                    });
+                </script>-->
+        <script>
+            $(".btnTxt").click(function () {
+            $(".btnTxt").removeClass("btn-secondary").addClass("btn-primary");
+            if ($(".btnXLSX").hasClass("btn-success")) {
+            $(".btnXLSX").removeClass("btn-success").addClass("btn-secondary");
+            $("#cargaMasiva")[0].reset();
+            }
+            $("#inputFile").css("display", "block");
+            $("#btnSubmit").css("display", "block");
+            $("#inputFile").attr("accept", '.txt');
+            validarArchivo('inputFile', ['txt']);
+            })
+
+                    $(".btnXLSX").click(function () {
+            $(".btnXLSX").removeClass("btn-secondary").addClass("btn-success");
+            if ($(".btnTxt").hasClass("btn-primary")) {
+            $(".btnTxt").removeClass("btn-primary").addClass("btn-secondary");
+            $("#cargaMasiva")[0].reset();
+            }
+            $("#inputFile").css("display", "block");
+            $("#btnSubmit").css("display", "block");
+            $("#inputFile").attr("accept", '.xlsx, .xls');
+            validarArchivo('inputFile', ['xls', 'xlsx']);
+            })
+
+                    function validarArchivo(inputId, types = []) {
+                    var file = document.getElementById(inputId);
+                    file.onchange = function (e) {
+                    var ext = this.value.match(/\.([^\.]+)$/)[1];
+                    if (types.includes(ext)) {
+                    } else {
+                    this.value = '';
+                    }
+                    }
+                    }
+        </script>
+    </body>
+</html>

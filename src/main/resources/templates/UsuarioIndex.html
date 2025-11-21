@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<!--
+Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
+Click nbfs://nbhost/SystemFileSystem/Templates/Other/html.html to edit this template
+-->
+<html xmlns:th="http://www.thymeleaf.org" 
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{index}">
+    <body class="container-fluid" layout:fragment="contenido">
+        <style>
+            .profile-img {
+                width: 50px;
+                height: 50px;
+                object-fit: cover;
+            }
+        </style>
+        <script th:if="${success}" th:inline="javascript">
+            Swal.fire({
+            icon: [[${icon}]],
+                    title: [[${$success}]],
+            });
+        </script>
+        <script>
+            $(document).on('click', '.btnEliminarUsuario', function() {
+            var idUsuario = $(this).data('id');
+            var btn = $(this);
+            Swal.fire({
+            title: "¿Estás seguro?",
+                    text: "No podrás revertir esto",
+                    icon: "warning",
+                    showCancelButton: true,
+                    confirmButtonColor: "#3085d6",
+                    cancelButtonColor: "#d33",
+                    confirmButtonText: "Si, eliminar!"
+            }).then((result) => {
+            if (result.isConfirmed){
+            $.ajax({
+            type: 'POST',
+                    url: `/usuario/deleteUsuario/${idUsuario}`,
+                    success: function () {
+                    btn.closest('tr').fadeOut(300, function () {
+                        $(this).remove();
+                    });
+                    Swal.fire({
+                    title: "El usuario se eliminó con exito",
+                            icon: "success"
+                    });
+                    },
+                    error: function (){
+                    Swal.fire({
+                    title: "El usuario no se ha podido eliminar",
+                            icon: "error"
+                    });
+                    }
+            })
+            }
+            })
+            })
+        </script>
+        <div class="row container mx-auto">
+            <div class="col-12">
+                <div class="row">
+                    <div class="col-1 mt-3">
+                        <a class='btn btn-warning' th:href="@{cargaMasiva}">Carga Masiva</i></a>
+                    </div>
+                    <div class="col-1 ms-auto mt-3">
+                        <a class='btn btn-success rounded-pill' th:href="@{add}"><i class="bi bi-person-plus-fill"></i></a>
+                    </div>
+                </div>
+                <form class="row mt-3" method="post" th:object="${Usuario}" th:action="@{indexUsuario}">
+                    <div class="col-3">
+                        <input type="text" th:field="*{nombreUsuario}" class="form-control" placeholder="Ingrese el nombre del usuario">
+                    </div>
+                    <div class="col-3">
+                        <input type="text" th:field="*{apellidoPatUsuario}" class="form-control" placeholder="Ingrese el apellido paterno del usuario">
+                    </div>
+                    <div class="col-3">
+                        <input type="text" th:field="*{apellidoMatUsuario}" class="form-control" placeholder="Ingrese el apellido materno del usuario">
+                    </div>
+                    <div class="col-2">
+                        <select class="form-select" th:field="*{Rol.IdRol}">
+                            <option value=0 >Seleccione el rol</option>
+                            <option value=1>admin</option>
+                            <option value=2>usuario</option>
+                            <option value=3>invitado</option>
+                        </select>
+                    </div>
+                    <div class="col-1">
+                        <button type="submit" class="btn btn-primary"><i class="bi bi-search"></i></button>
+                    </div>
+                </form>
+                <div class="table-responsive mt-2">
+                    <table class="table table-striped">
+                        <thead class="table-dark">
+                            <tr>
+                                <th scope="col">Nombre Completo</th>
+                                <th scope="col">Contacto</th>
+                                <th scope="col">Direcciones</th>
+                                <th scope="col">Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr class="h-100" th:each="usuario: ${usuarios}">
+                                <td>
+                                    <div class="d-flex align-items-center">
+                                        <img class="rounded-circle profile-img me-3"
+                                             th:src="${usuario.fotoUsuario} != null 
+                                             ? 'data:image/jpg;base64,' + ${usuario.fotoUsuario} 
+                                             : 'https://media.istockphoto.com/id/1300845620/vector/user-icon-flat-isolated-on-white-background-user-symbol-vector-illustration.jpg?s=612x612&w=0&k=20&c=yBeyba0hUkh14_jgv1OKqIH0CCSWU_4ckRkAoy2p73o='"
+                                             alt="imagen-usuario" />
+                                        <div>
+                                            <p class="fw-bold mb-1" th:text="|${usuario.nombreUsuario} ${usuario.apellidoPatUsuario}|"></p>
+                                            <p class="text-muted mb-0" th:text="${usuario.userName}"></p>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td th:text="${usuario.TelefonoUsuario}"></td>
+                                <td>
+                                    <div th:if="${usuario.Direcciones == null or usuario.Direcciones.isEmpty()}">
+                                        <p>Este usuario no tiene direcciones aún</p>
+                                    </div>
+
+                                    <div th:if="${usuario.Direcciones.size() > 0}">
+                                        <ul>
+                                            <li th:each="direccion: ${usuario.Direcciones}">
+                                                <p 
+                                                    th:text="|${direccion.calle} ${direccion.numeroInterior} ${direccion.numeroExterior} ${direccion.Colonia.nombreColonia} ${direccion.Colonia.codigoPostal} ${direccion.Colonia.Municipio.nombreMunicipio} ${direccion.Colonia.Municipio.Estado.nombreEstado} ${direccion.Colonia.Municipio.Estado.Pais.nombrePais}| "
+                                                    ></p>
+                                            </li>
+                                        </ul>                                    
+                                    </div>
+                                </td>
+                                <td>
+                                    <button class="btn btn-danger btnEliminarUsuario" th:attr="data-id=${usuario.idUsuario}"><i class="bi bi-trash-fill"></i></button>
+                                    <a class="btn btn-primary" th:href="@{|detail/${usuario.idUsuario}|}"><i class="bi bi-eye-fill"></i></a>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div> 
+            </div>  
+        </div>
+    </body>
+</html>
