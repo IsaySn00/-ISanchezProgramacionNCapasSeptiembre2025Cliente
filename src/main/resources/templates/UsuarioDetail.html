@@ -27,6 +27,7 @@ Click nbfs://nbhost/SystemFileSystem/Templates/Other/html.html to edit this temp
                         <div class="row">
                             <form th:action="@{/usuario/updateImgUsuario}" id="formUpdateImg" th:object="${usuario}" enctype="multipart/form-data" method="post">
                                 <input type="hidden" th:field="*{idUsuario}"/>
+                                <input type="hidden" name="_method" value="PATCH">                                    
                                 <input class="form-control col-6" type="file" accept="image/*" id="inputImgUsuario" name="imagenFile"></input>
                                 <button type="button" style="display: none;" id="btnUpdateImg" class="btn btn-success col-2 mt-2 ms-auto"><i class="bi bi-check-lg"></i></button>
                             </form>

@@ -42,6 +42,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.util.LinkedMultiValueMap;
@@ -49,6 +50,7 @@ import org.springframework.util.MultiValueMap;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -593,20 +595,19 @@ public class UsuarioController {
     @PutMapping("/detail")
     public String updateUsuario(@ModelAttribute("usuario") Usuario usuario,
             RedirectAttributes redirectAttributes) {
-        
+
         RestTemplate restTemplate = new RestTemplate();
-        
+
         HttpHeaders httpHeaders = new HttpHeaders();
         httpHeaders.setContentType(MediaType.APPLICATION_JSON);
-        
+
         HttpEntity<Usuario> request = new HttpEntity<>(usuario, httpHeaders);
-        
+
         ResponseEntity<Result> responseEntity = restTemplate.exchange(urlBase + "/api/usuarios/updateUsuario",
                 HttpMethod.PUT,
                 request,
                 Result.class);
-        
-        
+
         if (responseEntity.getStatusCode().value() == 202) {
             redirectAttributes.addFlashAttribute("successMessage", "EL usuario editó con exito");
             redirectAttributes.addFlashAttribute("iconModal", "success");
@@ -617,38 +618,65 @@ public class UsuarioController {
 
         return "redirect:/usuario/detail/" + usuario.getIdUsuario();
     }
-//
-//    @PostMapping("updateImgUsuario")
-//    public String UpdateImgUsuario(@ModelAttribute("usuario") Usuario usuario,
-//            RedirectAttributes redirectAttributes,
-//            @RequestParam("imagenFile") MultipartFile imagenFile) {
-//
-//        if (imagenFile != null) {
-//            try {
-//                String extension = imagenFile.getOriginalFilename().split("\\.")[1];
-//                if (extension.equals("jpg") || extension.equals(("png"))) {
-//
-//                    byte[] byteImagen = imagenFile.getBytes();
-//                    String imagenBase64 = Base64.getEncoder().encodeToString(byteImagen);
-//                    usuario.setFotoUsuario(imagenBase64);
-//                }
-//            } catch (IOException ex) {
-//                java.util.logging.Logger.getLogger(UsuarioController.class.getName()).log(Level.SEVERE, null, ex);
-//            }
-//        }
-//
-//        Result result = usuarioJPADAOImplementation.UpdateImgUsuario(usuario);
-//
-//        if (result.correct) {
-//            redirectAttributes.addFlashAttribute("successMessage", "La imagen se actualizó con exito");
-//            redirectAttributes.addFlashAttribute("iconModal", "success");
-//        } else {
-//            redirectAttributes.addFlashAttribute("successMessage", "La imagen no se pudó actualizar");
-//            redirectAttributes.addFlashAttribute("iconModal", "error");
-//        }
-//
-//        return "redirect:/usuario/detail/" + usuario.getIdUsuario();
-//    }
+
+    @PatchMapping("updateImgUsuario")
+    public String UpdateImgUsuario(@ModelAttribute("usuario") Usuario usuario,
+            RedirectAttributes redirectAttributes,
+            @RequestParam("imagenFile") MultipartFile imagenFile) {
+
+        RestTemplate restTemplate = new RestTemplate();
+
+        restTemplate.setRequestFactory(new HttpComponentsClientHttpRequestFactory());
+        
+        MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
+
+        HttpHeaders jsonHeaders = new HttpHeaders();
+
+        jsonHeaders.setContentType(MediaType.APPLICATION_JSON);
+
+        HttpEntity<Usuario> usuarioEntity = new HttpEntity<>(usuario, jsonHeaders);
+
+        body.add("usuario", usuarioEntity);
+
+        if (imagenFile != null) {
+            try {
+                ByteArrayResource fileAsResource = new ByteArrayResource(imagenFile.getBytes()) {
+                    @Override
+                    public String getFilename() {
+                        return imagenFile.getOriginalFilename();
+                    }
+                };
+
+                HttpHeaders fileHeaders = new HttpHeaders();
+                fileHeaders.setContentType(MediaType.MULTIPART_FORM_DATA);
+
+                body.add("imgFile", new HttpEntity<>(fileAsResource, fileHeaders));
+            } catch (IOException ex) {
+                java.util.logging.Logger.getLogger(UsuarioController.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.MULTIPART_FORM_DATA);
+
+        HttpEntity<MultiValueMap<String, Object>> requestEntity = new HttpEntity<>(body, headers);
+
+        ResponseEntity<Result> responseEntity = restTemplate.exchange(
+                urlBase + "/api/usuarios/updateImgUsuario",
+                HttpMethod.PATCH,
+                requestEntity,
+                Result.class);
+
+        if (responseEntity.getStatusCode().value() == 202) {
+            redirectAttributes.addFlashAttribute("successMessage", "La imagen se actualizó con exito");
+            redirectAttributes.addFlashAttribute("iconModal", "success");
+        } else {
+            redirectAttributes.addFlashAttribute("successMessage", "La imagen no se pudó actualizar");
+            redirectAttributes.addFlashAttribute("iconModal", "error");
+        }
+
+        return "redirect:/usuario/detail/" + usuario.getIdUsuario();
+    }
 //
 //    @PostMapping("deleteUsuario/{idUsuario}")
 //    public String deleteUsuario(@PathVariable("idUsuario") int idUsuario, RedirectAttributes redirectAttributes) {
@@ -679,7 +707,7 @@ public class UsuarioController {
 //
 //        return "redirect:/usuario/detail/" + usuarioId;
 //    }
-//
+
 //    @PostMapping("/updateDireccion")
 //    public String updateDireccion(@ModelAttribute("Direccion") Direccion direccion, @RequestParam int usuarioId, RedirectAttributes redirectAttributes) {
 //        Result result = direccionJPADAOImplementation.UpdateDireccion(direccion, usuarioId);
