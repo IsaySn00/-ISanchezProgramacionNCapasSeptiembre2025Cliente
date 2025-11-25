@@ -351,6 +351,27 @@ public class UsuarioController {
 
         return "redirect:/usuario/indexUsuario";
     }
+    
+//    @PatchMapping("/usuario/{idUsuario}/bajaLogica")
+//    public String BajaLogica(@ModelAttribute("usuario") Usuario usuario, @PathVariable("idUsuario") int idUsuario,
+//            @RequestParam("status") int status){
+//        
+//        RestTemplate restTemplate = new RestTemplate();
+//        
+//        ResponseEntity<Result> responseEntity = restTemplate.exchange(urlBase + "/usuario/" + idUsuario + "/bajaLogica?status=" + status,
+//                HttpMethod.PATCH,
+//                HttpEntity.EMPTY,
+//                Result.class);
+//        
+//        if(responseEntity.getStatusCode().value() == 202){
+//            
+//        }else{
+//            
+//        }
+//        
+//        return ""
+//        
+//    }
 
     @PutMapping("/detail")
     public String updateUsuario(@ModelAttribute("usuario") Usuario usuario,

@@ -39,7 +39,7 @@ Click nbfs://nbhost/SystemFileSystem/Templates/Other/html.html to edit this temp
                     url: `http://localhost:8080/api/usuarios/deleteUsuario/${idUsuario}`,
                     success: function () {
                     btn.closest('tr').fadeOut(300, function () {
-                        $(this).remove();
+                    $(this).remove();
                     });
                     Swal.fire({
                     title: "El usuario se eliminó con exito",
@@ -56,6 +56,30 @@ Click nbfs://nbhost/SystemFileSystem/Templates/Other/html.html to edit this temp
             }
             })
             })
+
+                    $(document).on('change', '.checkboxStatus', function() {
+
+            let idUsuario = $(this).data('id');
+            let statusUsuario = $(this).is(':checked') ? 1 : 0;
+            $.ajax({
+            type: 'PATCH',
+                    url: `http://localhost:8080/api/usuarios/usuario/${idUsuario}/bajaLogica?status=${statusUsuario}`,
+                    success: function() {
+                    Swal.fire({
+                    title: "El usuario ha cambiado de estatus",
+                            icon: "success"
+                    });
+                    },
+                    error: function (){
+                    Swal.fire({
+                    title: "El usuario no ha podido cambiarse de status",
+                            icon: "error"
+                    });
+                    }
+            })
+            });
+
+
         </script>
         <div class="row container mx-auto">
             <div class="col-12">
@@ -68,7 +92,7 @@ Click nbfs://nbhost/SystemFileSystem/Templates/Other/html.html to edit this temp
                     </div>
                 </div>
                 <form class="row mt-3" method="post" th:object="${Usuario}" th:action="@{indexUsuario}">
-                    <div class="col-3">
+                    <div class="col-2">
                         <input type="text" th:field="*{nombreUsuario}" class="form-control" placeholder="Ingrese el nombre del usuario">
                     </div>
                     <div class="col-3">
@@ -77,12 +101,19 @@ Click nbfs://nbhost/SystemFileSystem/Templates/Other/html.html to edit this temp
                     <div class="col-3">
                         <input type="text" th:field="*{apellidoMatUsuario}" class="form-control" placeholder="Ingrese el apellido materno del usuario">
                     </div>
-                    <div class="col-2">
+                    <div class="col-1">
                         <select class="form-select" th:field="*{Rol.IdRol}">
                             <option value=0 >Seleccione el rol</option>
                             <option value=1>admin</option>
                             <option value=2>usuario</option>
                             <option value=3>invitado</option>
+                        </select>
+                    </div>
+                    <div class="col-2">
+                        <select class="form-select" th:field="*{statusUsuario}">
+                            <option value="">Seleccione el estatus</option>
+                            <option value=1>Activo</option>
+                            <option value=0>Inactivo</option>
                         </select>
                     </div>
                     <div class="col-1">
@@ -96,6 +127,7 @@ Click nbfs://nbhost/SystemFileSystem/Templates/Other/html.html to edit this temp
                                 <th scope="col">Nombre Completo</th>
                                 <th scope="col">Contacto</th>
                                 <th scope="col">Direcciones</th>
+<!--                                <th scope="col">Estatus</th>-->
                                 <th scope="col">Acciones</th>
                             </tr>
                         </thead>
@@ -130,9 +162,16 @@ Click nbfs://nbhost/SystemFileSystem/Templates/Other/html.html to edit this temp
                                         </ul>                                    
                                     </div>
                                 </td>
+<!--                                <td>
+                                    <p id="statusUsuario" th:text="${usuario.statusUsuario == 1 ? 'Activo' : 'Inactivo'}"></p>
+                                </td>-->
                                 <td>
                                     <button class="btn btn-danger btnEliminarUsuario" th:attr="data-id=${usuario.idUsuario}"><i class="bi bi-trash-fill"></i></button>
                                     <a class="btn btn-primary" th:href="@{|detail/${usuario.idUsuario}|}"><i class="bi bi-eye-fill"></i></a>
+                                    <div class="form-check form-switch mt-3">
+                                        <input class="form-check-input checkboxStatus" th:attr="data-id=${usuario.idUsuario}" type="checkbox" role="switch" th:checked="${usuario.statusUsuario} == 1">
+                                        <label class="form-check-label" for="checkboxStatus">Status Usuario</label>
+                                    </div>
                                 </td>
                             </tr>
                         </tbody>
