@@ -57,6 +57,7 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
@@ -124,86 +125,75 @@ public class UsuarioController {
 
         return "UsuarioIndex";
     }
-//
-//    @GetMapping("cargaMasiva")
-//    public String CargaMasiva() {
-//        return "UsuarioCargaMasiva";
-//    }
-//
-//    @GetMapping("cargaMasiva/procesar")
-//    public String CargaMasiva(HttpSession session, Model model) {
-//
-//        String path = session.getAttribute("archivoCargaMasiva").toString();
-//        session.removeAttribute("archivoCargaMasiva");
-//        List<Usuario> lista = new ArrayList<>();
-//
-//        File file = new File(path);
-//        String extension = FilenameUtils.getExtension(path);
-//
-//        if (extension.equals("txt")) {
-//            lista = LeerArchivoTXT(file);
-//        } else if (extension.equals("xlsx")) {
-//            lista = LecturaArchivoXLSX(file);
-//        }
-//
-//        Result result = usuarioJPADAOImplementation.AddUsuariosByFile(lista);
-//
-//        if (result.correct) {
-//            model.addAttribute("success", "Los usuarios se procesaron con exito");
-//            model.addAttribute("icon", "success");
-//        } else {
-//            model.addAttribute("success", "El archivo no se ha podido procesar");
-//            model.addAttribute("icon", "error");
-//        }
-//
-//        return "UsuarioCargaMasiva";
-//    }
-//
-//    @PostMapping("cargaMasiva")
-//    public String CargaMasiva(@RequestParam("archivo") MultipartFile archivo, Model model, HttpSession session) {
-//
-//        List<Usuario> lista = new ArrayList<>();
-//        List<ErrorCarga> listaError = new ArrayList<>();
-//
-//        String extension = archivo.getOriginalFilename().split("\\.")[1];
-//
-//        String path = System.getProperty("user.dir");
-//        String pathArchivo = "src/main/resources/archivosCarga";
-//        String fecha = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMddHHmmSS"));
-//        String pathDefinitivo = path + "/" + pathArchivo + "/" + fecha + archivo.getOriginalFilename();
-//
-//        try {
-//            archivo.transferTo(new File(pathDefinitivo));
-//        } catch (IOException ex) {
-//            java.util.logging.Logger.getLogger(UsuarioController.class.getName()).log(Level.SEVERE, null, ex);
-//        } catch (IllegalStateException ex) {
-//            java.util.logging.Logger.getLogger(UsuarioController.class.getName()).log(Level.SEVERE, null, ex);
-//        }
-//
-//        File file = new File(pathDefinitivo);
-//
-//        if (extension.equals("txt")) {
-//            lista = LeerArchivoTXT(file);
-//        } else if (extension.equals("xlsx")) {
-//            lista = LecturaArchivoXLSX(file);
-//        } else {
-//
-//        }
-//
-//        listaError = validarDatosArchivo(lista);
-//
-//        if (listaError.size() > 0) {
-//            model.addAttribute("errores", listaError);
-//        } else {
-//            model.addAttribute("successValidation", true);
-//            session.setAttribute("archivoCargaMasiva", pathDefinitivo);
-//        }
-//
-//        return "UsuarioCargaMasiva";
-//
-//    }
-//
 
+    @GetMapping("cargaMasiva")
+    public String CargaMasiva() {
+        return "UsuarioCargaMasiva";
+    }
+
+    @GetMapping("cargaMasiva/procesar")
+    public String CargaMasiva(HttpSession session, Model model) {
+
+        String tkn = session.getAttribute("tkn").toString();
+        session.removeAttribute("tkn");
+
+        RestTemplate restTemplate = new RestTemplate();
+
+        ResponseEntity<Result> responseEntity = restTemplate.exchange(urlBase + "/api/usuarios/cargaMasiva?tkn=" + tkn,
+                HttpMethod.GET,
+                HttpEntity.EMPTY,
+                Result.class);
+
+        if (responseEntity.getStatusCode().value() == 201) {
+            model.addAttribute("success", "Los usuarios se procesaron con exito");
+            model.addAttribute("icon", "success");
+        } else {
+            model.addAttribute("success", "El archivo no se ha podido procesar");
+            model.addAttribute("icon", "error");
+        }
+
+        return "UsuarioCargaMasiva";
+    }
+
+    @PostMapping("cargaMasiva")
+    public String CargaMasiva(@RequestParam("archivo") MultipartFile archivo, Model model, HttpSession session) {
+
+        RestTemplate restTemplate = new RestTemplate();
+
+        MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
+
+        body.add("archivo", archivo.getResource());
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.MULTIPART_FORM_DATA);
+
+        HttpEntity<MultiValueMap<String, Object>> requestEntity = new HttpEntity<>(body, headers);
+
+        try {
+            ResponseEntity<Result> responseEntity = restTemplate.exchange(urlBase + "/api/usuarios/cargaMasiva",
+                    HttpMethod.POST,
+                    requestEntity,
+                    Result.class);
+
+            model.addAttribute("successValidation", true);
+            session.setAttribute("tkn", responseEntity.getBody().object);
+
+        } catch (HttpClientErrorException.UnprocessableEntity ex) {
+            ObjectMapper mapper = new ObjectMapper();
+
+            Result result = new Result();
+
+            try {
+                result = mapper.readValue(ex.getResponseBodyAsString(), Result.class);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            model.addAttribute("errores", result.object);
+        }
+
+        return "UsuarioCargaMasiva";
+
+    }
 
     @GetMapping("detail/{idUsuario}")
     public String Detail(@PathVariable("idUsuario") int idUsuario, Model model) {
@@ -507,7 +497,7 @@ public class UsuarioController {
                 redirectAttributes.addFlashAttribute("iconModal", "error");
             }
         }
-        
+
         return "redirect:/usuario/detail/" + idUsuario;
     }
 //
