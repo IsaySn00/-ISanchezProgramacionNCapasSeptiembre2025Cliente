@@ -13,6 +13,21 @@ Click nbfs://nbhost/SystemFileSystem/Templates/Other/html.html to edit this temp
                     icon: [[${iconModal}]]
             });
         </script>
+
+        <script th:if="${error}">
+            $(document).ready(function (){
+            $('.userModal').modal('show');
+            })
+        </script>
+        <style>
+            .correct{
+                border-color: green;
+            }
+
+            .error{
+                border-color: red;
+            }
+        </style>
         <div class="container-fluid">
             <div class="row container mx-auto mt-4">
                 <div class="col-12 col-sm-3 my-auto">
@@ -59,7 +74,7 @@ Click nbfs://nbhost/SystemFileSystem/Templates/Other/html.html to edit this temp
                         </tbody>
                     </table>
                 </div>
-                <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                <div class="modal fade userModal" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
                     <div class="modal-dialog modal-lg">
                         <div class="modal-content">
                             <div class="modal-header bg-primary text-white">
@@ -74,26 +89,44 @@ Click nbfs://nbhost/SystemFileSystem/Templates/Other/html.html to edit this temp
                                         <div class="col-md-6">
                                             <label class="form-label">Nombre</label>
                                             <input type="text" th:field="*{NombreUsuario}" class="form-control" placeholder="Nombre">
+                                            <div th:each="errorCampo : ${error}" th:if="${errorCampo.campo == 'NombreUsuario'}">
+                                                <span class="error-msg text-danger" th:text="${errorCampo.descripcion}"></span>
+                                            </div>
                                         </div>
                                         <div class="col-md-6">
                                             <label class="form-label">Apellido Paterno</label>
                                             <input type="text" th:field="*{ApellidoPatUsuario}" class="form-control" placeholder="Apellido paterno">
+                                            <div th:each="errorCampo : ${error}" th:if="${errorCampo.campo == 'ApellidoPatUsuario'}">
+                                                <span class="error-msg text-danger" th:text="${errorCampo.descripcion}"></span>
+                                            </div>
                                         </div>
                                         <div class="col-md-6">
                                             <label class="form-label">Apellido Materno</label>
                                             <input type="text" th:field="*{ApellidoMatUsuario}" class="form-control" placeholder="Apellido materno">
+                                            <div th:each="errorCampo : ${error}" th:if="${errorCampo.campo == 'ApellidoMatUsuario'}">
+                                                <span class="error-msg text-danger" th:text="${errorCampo.descripcion}"></span>
+                                            </div>
                                         </div>
                                         <div class="col-md-6">
                                             <label class="form-label">Usuario</label>
                                             <input type="text" th:field="*{userName}" class="form-control" placeholder="Nombre de usuario">
+                                            <div th:each="errorCampo : ${error}" th:if="${errorCampo.campo == 'userName'}">
+                                                <span class="error-msg text-danger" th:text="${errorCampo.descripcion}"></span>
+                                            </div>
                                         </div>
                                         <div class="col-md-6">
                                             <label class="form-label">Correo Electrónico</label>
                                             <input type="email" th:field="*{emailUsuario}" class="form-control" placeholder="correo@ejemplo.com">
+                                            <div th:each="errorCampo : ${error}" th:if="${errorCampo.campo == 'emailUsuario'}">
+                                                <span class="error-msg text-danger" th:text="${errorCampo.descripcion}"></span>
+                                            </div>
                                         </div>
                                         <div class="col-md-6">
                                             <label class="form-label">Fecha de Nacimiento</label>
-                                            <input type="date" th:field="*{FechaNacimiento}" class="form-control">                                        
+                                            <input type="date" th:field="*{FechaNacimiento}" class="form-control"> 
+                                            <div th:each="errorCampo : ${error}" th:if="${errorCampo.campo == 'FechaNacimiento'}">
+                                                <span class="error-msg text-danger" th:text="${errorCampo.descripcion}"></span>
+                                            </div>
                                         </div>
                                         <div class="col-md-6">
                                             <label class="form-label d-block">Sexo</label>
@@ -105,24 +138,39 @@ Click nbfs://nbhost/SystemFileSystem/Templates/Other/html.html to edit this temp
                                                 <input class="form-check-input" type="radio" th:field="*{SexoUsuario}" value="F" id="sexoF">
                                                 <label class="form-check-label" for="sexoF">Femenino</label>
                                             </div>
+                                             <div th:each="errorCampo : ${error}" th:if="${errorCampo.campo == 'SexoUsuario'}">
+                                                <span class="error-msg text-danger" th:text="${errorCampo.descripcion}"></span>
+                                            </div>
                                         </div>
                                         <div class="col-md-6">
                                             <label class="form-label">Teléfono</label>
                                             <input th:field="*{TelefonoUsuario}" type="text" class="form-control" id="telefonoUsuario" required>
+                                            <div th:each="errorCampo : ${error}" th:if="${errorCampo.campo == 'TelefonoUsuario'}">
+                                                <span class="error-msg text-danger" th:text="${errorCampo.descripcion}"></span>
+                                            </div>
                                         </div>
                                         <div class="col-md-6">
                                             <label class="form-label">Celular</label>
                                             <input th:field="*{CelularUsuario}" type="text" class="form-control" id="celularUsuario">
+                                            <div th:each="errorCampo : ${error}" th:if="${errorCampo.campo == 'CelularUsuario'}">
+                                                <span class="error-msg text-danger" th:text="${errorCampo.descripcion}"></span>
+                                            </div>
                                         </div>
                                         <div class="col-md-6">
                                             <label class="form-label">CURP</label>
                                             <input th:field="*{CurpUsuario}" type="text" class="form-control" id="curpUsuario">
+                                            <div th:each="errorCampo : ${error}" th:if="${errorCampo.campo == 'CurpUsuario'}">
+                                                <span class="error-msg text-danger" th:text="${errorCampo.descripcion}"></span>
+                                            </div>
                                         </div>
                                         <div class="col-md-6">
                                             <label class="form-label">Rol</label>
                                             <select th:field="*{Rol.idRol}" class="form-select">
                                                 <option value=0>Seleccione un rol</option>
                                                 <option th:each="rol : ${roles}" th:value="${rol.idRol}" th:text="${rol.nombreRol}" selected></option>
+                                                <div th:each="errorCampo : ${error}" th:if="${errorCampo.campo == 'rol.idRol'}">
+                                                <span class="error-msg text-danger" th:text="${errorCampo.descripcion}"></span>
+                                            </div>
                                             </select>
                                         </div>
                                     </div>
@@ -201,7 +249,7 @@ Click nbfs://nbhost/SystemFileSystem/Templates/Other/html.html to edit this temp
             </div>
         </div>
         <script>
-            $(document).ready(function () {
+                    $(document).ready(function () {
 
             $("#btnUpdateImg").click(function () {
             const form = document.getElementById("formUpdateImg");

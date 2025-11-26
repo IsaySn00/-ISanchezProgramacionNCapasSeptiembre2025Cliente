@@ -3,6 +3,8 @@ package com.digis01.ISanchezProgramacionNCapasSeptiembre2025.Controller;
 import com.digis01.ISanchezProgramacionNCapasSeptiembre2025.ML.Colonia;
 import com.digis01.ISanchezProgramacionNCapasSeptiembre2025.ML.Direccion;
 import com.digis01.ISanchezProgramacionNCapasSeptiembre2025.ML.ErrorCarga;
+import com.digis01.ISanchezProgramacionNCapasSeptiembre2025.ML.Estado;
+import com.digis01.ISanchezProgramacionNCapasSeptiembre2025.ML.Municipio;
 import com.digis01.ISanchezProgramacionNCapasSeptiembre2025.ML.Pais;
 import com.digis01.ISanchezProgramacionNCapasSeptiembre2025.ML.Result;
 import com.digis01.ISanchezProgramacionNCapasSeptiembre2025.ML.Rol;
@@ -261,6 +263,63 @@ public class UsuarioController {
         return resultPais;
     }
 
+    public Result GetEstados(int idPais) {
+        RestTemplate restTemplate = new RestTemplate();
+
+        Result result = new Result();
+
+        ResponseEntity<Result<List<Estado>>> responseEntity = restTemplate.exchange(
+                urlBase + "/api/estado/estados/" + idPais,
+                HttpMethod.GET,
+                HttpEntity.EMPTY,
+                new ParameterizedTypeReference<Result<List<Estado>>>() {
+        });
+
+        if (responseEntity.getStatusCode().value() == 200) {
+            result = responseEntity.getBody();
+        }
+
+        return result;
+    }
+
+    public Result GetMunicipios(int idEstado) {
+        RestTemplate restTemplate = new RestTemplate();
+
+        Result result = new Result();
+
+        ResponseEntity<Result<List<Municipio>>> responseEntity = restTemplate.exchange(
+                urlBase + "/api/municipio/municipios/" + idEstado,
+                HttpMethod.GET,
+                HttpEntity.EMPTY,
+                new ParameterizedTypeReference<Result<List<Municipio>>>() {
+        });
+
+        if (responseEntity.getStatusCode().value() == 200) {
+            result = responseEntity.getBody();
+        }
+
+        return result;
+    }
+
+    public Result GetColonias(int idColonia) {
+        RestTemplate restTemplate = new RestTemplate();
+
+        Result result = new Result();
+
+        ResponseEntity<Result<List<Colonia>>> responseEntity = restTemplate.exchange(
+                urlBase + "/api/colonia/colonias/" + idColonia,
+                HttpMethod.GET,
+                HttpEntity.EMPTY,
+                new ParameterizedTypeReference<Result<List<Colonia>>>() {
+        });
+
+        if (responseEntity.getStatusCode().value() == 200) {
+            result = responseEntity.getBody();
+        }
+
+        return result;
+    }
+
     public Result GetRoles() {
         RestTemplate restTemplate = new RestTemplate();
 
@@ -285,21 +344,6 @@ public class UsuarioController {
             BindingResult bindingResult, RedirectAttributes redirectAttributes,
             Model model, @RequestParam("imagenFile") MultipartFile imagenFile) throws JsonProcessingException {
 
-//        if (bindingResult.hasErrors()) {
-//            model.addAttribute("Usuario", usuario);
-//            model.addAttribute("roles", rolJPADAOImplementation.GetAll().objects);
-//            model.addAttribute("paises", paisJPADAOImplementation.GetAll().objects);
-//            if (usuario.Direcciones.get(0).Colonia.Municipio.Estado.Pais.getIdPais() > 0) {
-//                model.addAttribute("estados", estadoJPADAOImplementation.GetAll(usuario.Direcciones.get(0).Colonia.Municipio.Estado.Pais.getIdPais()).objects);
-//                if (usuario.Direcciones.get(0).Colonia.Municipio.Estado.Pais.getIdPais() > 0) {
-//                    model.addAttribute("municipios", municipioJPaDAOImplementation.GetAllMunicipioByIdEstado(usuario.Direcciones.get(0).Colonia.Municipio.Estado.getIdEstado()).objects);
-//                    if (usuario.Direcciones.get(0).Colonia.Municipio.Estado.getIdEstado() > 0) {
-//                        model.addAttribute("colonias", coloniaJPADAOImplementation.GetAllColoniaByIdMunicipio(usuario.Direcciones.get(0).Colonia.Municipio.getIdMunicipio()).objects);
-//                    }
-//                }
-//            }
-//            return "UsuarioForm";
-//        }
         RestTemplate restTemplate = new RestTemplate();
 
         MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
@@ -335,46 +379,58 @@ public class UsuarioController {
 
         HttpEntity<MultiValueMap<String, Object>> requestEntity = new HttpEntity<>(body, headers);
 
-        ResponseEntity<Result> responseEntity = restTemplate.exchange(
-                urlBase + "/api/usuarios/usuario",
-                HttpMethod.POST,
-                requestEntity,
-                Result.class);
+        try {
+            ResponseEntity<Result> responseEntity = restTemplate.exchange(
+                    urlBase + "/api/usuarios/usuario",
+                    HttpMethod.POST,
+                    requestEntity,
+                    Result.class);
 
-        if (responseEntity.getStatusCode().value() == 201) {
             redirectAttributes.addFlashAttribute("success", "EL usuario" + usuario.getUserName() + "Se creo con exito");
             redirectAttributes.addFlashAttribute("icon", "success");
-        } else {
-            redirectAttributes.addFlashAttribute("success", "EL usuario no se ha podido crear");
-            redirectAttributes.addFlashAttribute("icon", "error");
+
+        } catch (HttpClientErrorException.UnprocessableEntity ex) {
+            ObjectMapper mapper = new ObjectMapper();
+
+            Result result = new Result();
+
+            try {
+                result = mapper.readValue(ex.getResponseBodyAsString(), Result.class);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+
+            model.addAttribute("error", result.object);
+
+            model.addAttribute("Usuario", usuario);
+            model.addAttribute("roles", GetRoles().object);
+            model.addAttribute("paises", GetPaises().object);
+            if (usuario.Direcciones.get(0).Colonia.Municipio.Estado.Pais.getIdPais() > 0) {
+                model.addAttribute("estados", GetEstados(usuario.Direcciones.get(0).Colonia.Municipio.Estado.Pais.getIdPais()).object);
+                if (usuario.Direcciones.get(0).Colonia.Municipio.Estado.Pais.getIdPais() > 0) {
+                    model.addAttribute("municipios", GetMunicipios(usuario.Direcciones.get(0).Colonia.Municipio.Estado.getIdEstado()).object);
+                    if (usuario.Direcciones.get(0).Colonia.Municipio.Estado.getIdEstado() > 0) {
+                        model.addAttribute("colonias", GetColonias(usuario.Direcciones.get(0).Colonia.Municipio.getIdMunicipio()).object);
+                    }
+                }
+            }
+            return "UsuarioForm";
+
         }
 
+//        if (responseEntity.getStatusCode().value() == 201) {
+//
+//        } else if (responseEntity.getStatusCode().value() == 422) {
+//            
+//        } else {
+//            redirectAttributes.addFlashAttribute("success", "EL usuario no se ha podido crear");
+//            redirectAttributes.addFlashAttribute("icon", "error");
+//        }
         return "redirect:/usuario/indexUsuario";
     }
-    
-//    @PatchMapping("/usuario/{idUsuario}/bajaLogica")
-//    public String BajaLogica(@ModelAttribute("usuario") Usuario usuario, @PathVariable("idUsuario") int idUsuario,
-//            @RequestParam("status") int status){
-//        
-//        RestTemplate restTemplate = new RestTemplate();
-//        
-//        ResponseEntity<Result> responseEntity = restTemplate.exchange(urlBase + "/usuario/" + idUsuario + "/bajaLogica?status=" + status,
-//                HttpMethod.PATCH,
-//                HttpEntity.EMPTY,
-//                Result.class);
-//        
-//        if(responseEntity.getStatusCode().value() == 202){
-//            
-//        }else{
-//            
-//        }
-//        
-//        return ""
-//        
-//    }
 
     @PutMapping("/detail")
-    public String updateUsuario(@ModelAttribute("usuario") Usuario usuario,
+    public String updateUsuario(@ModelAttribute("usuario") Usuario usuario, Model model,
             RedirectAttributes redirectAttributes) {
 
         RestTemplate restTemplate = new RestTemplate();
@@ -384,19 +440,44 @@ public class UsuarioController {
 
         HttpEntity<Usuario> request = new HttpEntity<>(usuario, httpHeaders);
 
-        ResponseEntity<Result> responseEntity = restTemplate.exchange(urlBase + "/api/usuarios/updateUsuario",
-                HttpMethod.PUT,
-                request,
-                Result.class);
+        try {
+            ResponseEntity<Result> responseEntity = restTemplate.exchange(urlBase + "/api/usuarios/updateUsuario",
+                    HttpMethod.PUT,
+                    request,
+                    Result.class);
 
-        if (responseEntity.getStatusCode().value() == 202) {
             redirectAttributes.addFlashAttribute("successMessage", "EL usuario editó con exito");
             redirectAttributes.addFlashAttribute("iconModal", "success");
-        } else {
-            redirectAttributes.addFlashAttribute("successMessage", "EL usuario no se ha podido editar");
-            redirectAttributes.addFlashAttribute("iconModal", "error");
+
+        } catch (HttpClientErrorException.UnprocessableEntity ex) {
+            
+            ObjectMapper mapper = new ObjectMapper();
+
+            Result result = new Result();
+
+            try {
+                result = mapper.readValue(ex.getResponseBodyAsString(), Result.class);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+
+            redirectAttributes.addFlashAttribute("error", result.object);
+
+            redirectAttributes.addFlashAttribute("usuario", usuario);
+                
+            redirectAttributes.addFlashAttribute("roles", GetRoles().object);
+            
+
+            return "redirect:/usuario/detail/" + usuario.getIdUsuario();
         }
 
+//
+//        if (responseEntity.getStatusCode().value() == 202) {
+//
+//        } else {
+//            redirectAttributes.addFlashAttribute("successMessage", "EL usuario no se ha podido editar");
+//            redirectAttributes.addFlashAttribute("iconModal", "error");
+//        }
         return "redirect:/usuario/detail/" + usuario.getIdUsuario();
     }
 
@@ -521,55 +602,4 @@ public class UsuarioController {
 
         return "redirect:/usuario/detail/" + idUsuario;
     }
-//
-//    @PostMapping("/deleteDireccion/{idDireccion}")
-//    public String deleteDireccion(@PathVariable("idDireccion") int idDireccion, @RequestParam("usuarioId") int usuarioId, RedirectAttributes redirectAttributes) {
-//        Result result = direccionJPADAOImplementation.DeleteDireccion(idDireccion);
-//
-//        if (result.correct) {
-//            redirectAttributes.addFlashAttribute("successMessage", "La dirección se eliminó con exito");
-//            redirectAttributes.addFlashAttribute("iconModal", "success");
-//        } else {
-//            redirectAttributes.addFlashAttribute("successMessage", "La dirección no se ha podido eliminar");
-//            redirectAttributes.addFlashAttribute("iconModal", "error");
-//        }
-//
-//        return "redirect:/usuario/detail/" + usuarioId;
-//    }
-//
-//    @GetMapping("estado/{idPais}")
-//    @ResponseBody
-//    public Result GetEstadosById(@PathVariable("idPais") int idPais) {
-//        return estadoJPADAOImplementation.GetAll(idPais);
-//    }
-//
-//    @GetMapping("municipio/{idEstado}")
-//    @ResponseBody
-//    public Result GetMunicipioByIdEstado(@PathVariable("idEstado") int idEstado) {
-//        return municipioJPaDAOImplementation.GetAllMunicipioByIdEstado(idEstado);
-//    }
-//
-//    @GetMapping("colonia/{idMunicipio}")
-//    @ResponseBody
-//    public Result GetColoniaByIdMunicipio(@PathVariable("idMunicipio") int idMunicipio) {
-//        return coloniaJPADAOImplementation.GetAllColoniaByIdMunicipio(idMunicipio);
-//    }
-//
-//    @GetMapping("colonia")
-//    @ResponseBody
-//    public Result GetCodigoPostalByNameColoniaIdMnpio(@RequestParam("nombreColonia") String nombreColonia, @RequestParam("idMunicipio") int idMunicipio) {
-//        return coloniaJPADAOImplementation.GetCodigoPostalByNameColoniaIdMnpio(nombreColonia, idMunicipio);
-//    }
-//
-//    @GetMapping("direccion/{codigoPostal}")
-//    @ResponseBody
-//    public Result GetDireccionesByCodigoPostal(@PathVariable("codigoPostal") String CodigoPostal) {
-//        return coloniaDAOImplementation.GetDireccionByCodigoPostal(CodigoPostal);
-//    }
-//
-//    @GetMapping("direccionById/{idDireccion}")
-//    @ResponseBody
-//    public Result getDireccionById(@PathVariable("idDireccion") int idDireccion) {
-//        return direccionJPADAOImplementation.GetAddressById(idDireccion);
-//    }
 }
