@@ -19,6 +19,45 @@ Click nbfs://nbhost/SystemFileSystem/Templates/Other/html.html to edit this temp
             $('.userModal').modal('show');
             })
         </script>
+        <script>
+                    $(document).ready(function () {
+
+            $("#btnOpenFile").click(function () {
+            $("#inputImgHidden").click();
+            });
+            $("#inputImgHidden").change(function () {
+
+            Swal.fire({
+            title: "¿Deseas actualizar la foto?",
+                    icon: "question",
+                    showCancelButton: true,
+                    confirmButtonText: "Sí, actualizar",
+                    cancelButtonText: "No"
+            }).then(result => {
+            if (result.isConfirmed) {
+            $("#formUpdateImg").submit();
+            }
+            });
+            });
+            
+            $("#btnDeleteImg").click(function () {
+
+            Swal.fire({
+            title: "¿Eliminar foto?",
+                    text: "Esta acción no se puede deshacer",
+                    icon: "warning",
+                    showCancelButton: true,
+                    confirmButtonColor: "#d33",
+                    confirmButtonText: "Sí, eliminar",
+                    cancelButtonText: "Cancelar"
+            }).then(result => {
+            if (result.isConfirmed) {
+            $("#formDeleteImg").submit();
+            }
+            });
+            });
+            });
+        </script>
         <style>
             .correct{
                 border-color: green;
@@ -28,27 +67,89 @@ Click nbfs://nbhost/SystemFileSystem/Templates/Other/html.html to edit this temp
                 border-color: red;
             }
         </style>
+        <style>
+            .profile-container {
+                position: relative;
+                width: 100%;
+                max-width: 250px;
+                margin: 0 auto;
+            }
+
+            .profile-img {
+                width: 100%;
+                border-radius: 10px;
+            }
+
+            .profile-actions {
+                position: absolute;
+                top: 10px;
+                right: 10px;
+                display: flex;
+                flex-direction: column;
+                gap: 8px;
+                opacity: 0;
+                transition: 0.3s ease;
+            }
+
+            .profile-container:hover .profile-actions {
+                opacity: 1;
+            }
+
+            .action-btn {
+                width: 35px;
+                height: 35px;
+                border-radius: 50%;
+                background: rgba(0,0,0,0.6);
+                color: white;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                cursor: pointer;
+                border: none;
+                font-size: 18px;
+            }
+
+            .action-btn:hover {
+                background: rgba(0,0,0,0.8);
+            }
+
+            #inputImgHidden {
+                display:none;
+            }
+        </style>
         <div class="container-fluid">
             <div class="row container mx-auto mt-4">
                 <div class="col-12 col-sm-3 my-auto">
-                    <img style="width: 100%;"
-                         th:src="${usuario.fotoUsuario} != null 
-                         ? 'data:image/jpg;base64,' + ${usuario.fotoUsuario} 
-                         : 'https://media.istockphoto.com/id/1300845620/vector/user-icon-flat-isolated-on-white-background-user-symbol-vector-illustration.jpg?s=612x612&w=0&k=20&c=yBeyba0hUkh14_jgv1OKqIH0CCSWU_4ckRkAoy2p73o='" 
-                         class="img-thumbnai mx-auto" alt="imagenUsuario">
-                    <p class="text-center" th:text="|${usuario.nombreUsuario} ${usuario.apellidoPatUsuario}|"></p> 
-                    <div class="mb-3">
-                        <label class="form-label">Actualizar foto de Usuario</label>
-                        <div class="row">
-                            <form th:action="@{/usuario/updateImgUsuario}" id="formUpdateImg" th:object="${usuario}" enctype="multipart/form-data" method="post">
-                                <input type="hidden" th:field="*{idUsuario}"/>
-                                <input type="hidden" name="_method" value="PATCH">                                    
-                                <input class="form-control col-6" type="file" accept="image/*" id="inputImgUsuario" name="imagenFile"></input>
-                                <button type="button" style="display: none;" id="btnUpdateImg" class="btn btn-success col-2 mt-2 ms-auto"><i class="bi bi-check-lg"></i></button>
-                            </form>
+                    <div class="profile-container">
+                        <img class="profile-img"
+                             th:src="${usuario.fotoUsuario} != null 
+                             ? 'data:image/jpg;base64,' + ${usuario.fotoUsuario} 
+                             : 'https://media.istockphoto.com/id/1300845620/vector/user-icon-flat-isolated-on-white-background-user-symbol-vector-illustration.jpg?s=612x612&w=0&k=20&c=yBeyba0hUkh14_jgv1OKqIH0CCSWU_4ckRkAoy2p73o='"
+                             alt="Usuario">
+
+                        <div class="profile-actions">
+
+                            <button class="action-btn" id="btnDeleteImg">
+                                <i class="bi bi-x-circle-fill"></i>
+                            </button>
+
+                            <button class="action-btn" id="btnOpenFile">
+                                <i class="bi bi-camera"></i>
+                            </button>
                         </div>
                     </div>
-                    <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#exampleModal">
+                    <form th:action="@{/usuario/updateImgUsuario}" id="formUpdateImg" th:object="${usuario}" enctype="multipart/form-data" method="post">
+                        <input type="hidden" th:field="*{idUsuario}">
+                        <input type="hidden" name="_method" value="PATCH">
+                        <input type="file" accept="image/*" id="inputImgHidden" name="imagenFile">
+                    </form>
+
+                    <form th:action="@{/usuario/updateImgUsuario}" id="formDeleteImg" th:object="${usuario}" enctype="multipart/form-data" method="post">
+                        <input type="hidden" th:field="*{idUsuario}">
+                        <input type="hidden" name="_method" value="PATCH">
+                        <input type="file" style="display:none" name="imagenFile" value="">
+                    </form>
+                    <button type="button" class="btn btn-primary mt-3" data-bs-toggle="modal" data-bs-target="#exampleModal">
                         Editar Usuario
                     </button>
                 </div>
@@ -138,7 +239,7 @@ Click nbfs://nbhost/SystemFileSystem/Templates/Other/html.html to edit this temp
                                                 <input class="form-check-input" type="radio" th:field="*{SexoUsuario}" value="F" id="sexoF">
                                                 <label class="form-check-label" for="sexoF">Femenino</label>
                                             </div>
-                                             <div th:each="errorCampo : ${error}" th:if="${errorCampo.campo == 'SexoUsuario'}">
+                                            <div th:each="errorCampo : ${error}" th:if="${errorCampo.campo == 'SexoUsuario'}">
                                                 <span class="error-msg text-danger" th:text="${errorCampo.descripcion}"></span>
                                             </div>
                                         </div>
@@ -169,8 +270,8 @@ Click nbfs://nbhost/SystemFileSystem/Templates/Other/html.html to edit this temp
                                                 <option value=0>Seleccione un rol</option>
                                                 <option th:each="rol : ${roles}" th:value="${rol.idRol}" th:text="${rol.nombreRol}" selected></option>
                                                 <div th:each="errorCampo : ${error}" th:if="${errorCampo.campo == 'rol.idRol'}">
-                                                <span class="error-msg text-danger" th:text="${errorCampo.descripcion}"></span>
-                                            </div>
+                                                    <span class="error-msg text-danger" th:text="${errorCampo.descripcion}"></span>
+                                                </div>
                                             </select>
                                         </div>
                                     </div>
@@ -249,7 +350,7 @@ Click nbfs://nbhost/SystemFileSystem/Templates/Other/html.html to edit this temp
             </div>
         </div>
         <script>
-                    $(document).ready(function () {
+            $(document).ready(function () {
 
             $("#btnUpdateImg").click(function () {
             const form = document.getElementById("formUpdateImg");
