@@ -26,6 +26,7 @@ import java.util.ArrayList;
 import java.util.Base64;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import java.util.logging.Level;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -128,6 +129,56 @@ public class UsuarioController {
         return "UsuarioIndex";
     }
 
+    @GetMapping("login")
+    public String Login() {
+        return "login";
+    }
+
+    @PostMapping("login")
+    public String Login(@RequestParam("username") String username, @RequestParam("password") String password, Model model, HttpSession session) {
+
+        try {
+            Usuario usuario = new Usuario();
+            usuario.setUserName(username);
+            usuario.setPasswordUser(password);
+
+            RestTemplate restTemplate = new RestTemplate();
+
+            HttpHeaders jsonHeaders = new HttpHeaders();
+
+            jsonHeaders.setContentType(MediaType.APPLICATION_JSON);
+
+            HttpEntity<Usuario> usuarioEntity = new HttpEntity<>(usuario, jsonHeaders);
+
+            ResponseEntity<Result<Map<String, Object>>> responseEntity = restTemplate.exchange(urlBase + "/api/auth/login",
+                    HttpMethod.POST,
+                    usuarioEntity,
+                    new ParameterizedTypeReference<Result<Map<String, Object>>>() {
+            });
+
+            Map<String, Object> data = responseEntity.getBody().object;
+
+            String rol = data.get("rol").toString();
+            Integer idUsuario = (Integer) data.get("idUsuario");
+            String tkn = data.get("token").toString();
+
+            session.setAttribute("tkn", tkn);
+
+            if (rol.equals("admin")) {
+                return "redirect:/usuario/indexUsuario";
+            } else if (rol.equals("usuario")) {
+                return "redirect:/usuario/detail/" + idUsuario;
+            }
+        } catch (Exception ex) {
+            model.addAttribute("loginError", true);
+            return "redirect:/usuario/login";
+        }
+
+        model.addAttribute("loginError", true);
+        return "login";
+
+    }
+
     @GetMapping("cargaMasiva")
     public String CargaMasiva() {
         return "UsuarioCargaMasiva";
@@ -198,13 +249,20 @@ public class UsuarioController {
     }
 
     @GetMapping("detail/{idUsuario}")
-    public String Detail(@PathVariable("idUsuario") int idUsuario, Model model) {
+    public String Detail(@PathVariable("idUsuario") int idUsuario, Model model, HttpSession session) {
 
+        String token = (String) session.getAttribute("tkn");
+        
+        HttpHeaders headers = new HttpHeaders();
+        headers.setBearerAuth(token);
+        
+        HttpEntity<Void> entity = new HttpEntity<>(headers);
+        
         RestTemplate restTemplate = new RestTemplate();
 
         ResponseEntity<Result<Usuario>> responseEntity = restTemplate.exchange(urlBase + "/api/usuarios/usuario/" + idUsuario,
                 HttpMethod.GET,
-                HttpEntity.EMPTY,
+                entity,
                 new ParameterizedTypeReference<Result<Usuario>>() {
         });
 
@@ -450,7 +508,7 @@ public class UsuarioController {
             redirectAttributes.addFlashAttribute("iconModal", "success");
 
         } catch (HttpClientErrorException.UnprocessableEntity ex) {
-            
+
             ObjectMapper mapper = new ObjectMapper();
 
             Result result = new Result();
@@ -464,9 +522,8 @@ public class UsuarioController {
             redirectAttributes.addFlashAttribute("error", result.object);
 
             redirectAttributes.addFlashAttribute("usuario", usuario);
-                
+
             redirectAttributes.addFlashAttribute("roles", GetRoles().object);
-            
 
             return "redirect:/usuario/detail/" + usuario.getIdUsuario();
         }

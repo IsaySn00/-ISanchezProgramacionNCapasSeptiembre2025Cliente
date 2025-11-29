@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<!--
+Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
+Click nbfs://nbhost/SystemFileSystem/Templates/Other/html.html to edit this template
+-->
+<html xmlns:th="http://www.thymeleaf.org">
+    <head>
+        <title>TODO supply a title</title>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous"></script>
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
+        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    </head>
+    <body class="container-fluid">
+        <div class="card container mt-5 w-50">
+            <div class="card-body">
+                <h2 class="text-center">Bienvenido<h2>
+                <div th:if="${loginError}" class="card bg-danger w-50 my-3 mx-auto">
+                    <p class="text-center fs-5 text-light">Error al iniciar sesión</p>
+                </div>        
+                <form class="container row" th:action="@{login}" method="post">
+                    <div class="mb-3 col-12">
+                        <label for="userName" class="form-label fs-5 mb-2">Nombre de Usuario</label>
+                        <input type="text" id="userName" name="username" class="form-control"/>    
+                    </div>
+                    <div class="mb-5 col-12">
+                        <label for="passwordUser" class="form-label fs-5 mb-2">Contraseña</label>
+                        <input type="password" id="passwordUser" name="password" class="form-control"/>
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-lg mx-auto col-3">Iniciar Sesión</button>                    
+                </form>        
+            </div>
+        </div>
+    </body>
+</html>
