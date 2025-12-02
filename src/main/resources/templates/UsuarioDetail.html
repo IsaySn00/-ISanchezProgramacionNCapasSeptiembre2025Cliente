@@ -39,7 +39,6 @@ Click nbfs://nbhost/SystemFileSystem/Templates/Other/html.html to edit this temp
             }
             });
             });
-            
             $("#btnDeleteImg").click(function () {
 
             Swal.fire({
@@ -349,9 +348,12 @@ Click nbfs://nbhost/SystemFileSystem/Templates/Other/html.html to edit this temp
                 </div>
             </div>
         </div>
-        <script>
+        <script th:inline="javascript">
             $(document).ready(function () {
 
+            let token = /*[[${session.tokenUser}]]*/ '';
+            sessionStorage.setItem("tokenUser", token);
+            
             $("#btnUpdateImg").click(function () {
             const form = document.getElementById("formUpdateImg");
             const fileInput = form.querySelector('input[name="imagenFile"]');
@@ -381,6 +383,7 @@ Click nbfs://nbhost/SystemFileSystem/Templates/Other/html.html to edit this temp
             type: "GET",
                     url: "http://localhost:8080/api/estado/estados/" + $("#ddlPais").val(),
                     datatype: "json",
+                    headers: {"Authorization": "Bearer " + sessionStorage.getItem("tokenUser")},
                     success: function (data, textStatus, jqXHR) {
                     $("#ddlEstado").prop("disabled", false)
                             $("#ddlColonia").prop("disabled", true);
@@ -404,6 +407,7 @@ Click nbfs://nbhost/SystemFileSystem/Templates/Other/html.html to edit this temp
             type: "GET",
                     url: "http://localhost:8080/api/municipio/municipios/" + $("#ddlEstado").val(),
                     datatype: "json",
+                    headers: {"Authorization": "Bearer " + sessionStorage.getItem("tokenUser")},
                     success: function (data, textStatus, jqXHR) {
                     $("#ddlMunicipio").prop("disabled", false)
                             $("#ddlMunicipio").empty();
@@ -425,6 +429,7 @@ Click nbfs://nbhost/SystemFileSystem/Templates/Other/html.html to edit this temp
             type: "GET",
                     url: "http://localhost:8080/api/colonia/colonias/" + $("#ddlMunicipio").val(),
                     datatype: "json",
+                    headers: {"Authorization": "Bearer " + sessionStorage.getItem("tokenUser")},
                     success: function (data, textStatus, jqXHR) {
                     $("#ddlColonia").prop("disabled", false)
                             $("#ddlColonia").empty();
@@ -442,6 +447,7 @@ Click nbfs://nbhost/SystemFileSystem/Templates/Other/html.html to edit this temp
                     $("#ddlColonia").change(function () {
             $.ajax({
             type: "GET",
+                    headers: {"Authorization": "Bearer " + sessionStorage.getItem("tokenUser")},
                     url: "http://localhost:8080/api/colonia/colonias?" + "nombreColonia=" + $("#ddlColonia option:selected").text() + "&idMunicipio=" + $("#ddlMunicipio").val(),
                     datatype: "json",
                     success: function (data, textStatus, jqXHR) {
@@ -457,6 +463,7 @@ Click nbfs://nbhost/SystemFileSystem/Templates/Other/html.html to edit this temp
                     $("#codigoPostal").blur(function () {
             $.ajax({
             type: "GET",
+                    headers: {"Authorization": "Bearer " + sessionStorage.getItem("tokenUser")},
                     url: "/usuario/direccion/" + $("#codigoPostal").val(),
                     datatype: "json",
                     success: function (data, textStatus, jqXHR) {
@@ -498,6 +505,7 @@ Click nbfs://nbhost/SystemFileSystem/Templates/Other/html.html to edit this temp
             type: 'GET',
                     url: 'http://localhost:8080/api/direcciones/direccion/' + idDireccion,
                     dataType: 'json',
+                    headers: {"Authorization": "Bearer " + sessionStorage.getItem("tokenUser")},
                     success: function(data) {
                     var d = data.object;
                     $('#direccionId').val(d.idDireccion);
@@ -539,6 +547,7 @@ Click nbfs://nbhost/SystemFileSystem/Templates/Other/html.html to edit this temp
             $.ajax({
             type: 'DELETE',
                     url: `http://localhost:8080/api/direcciones/direccion/${idDireccion}`,
+                    headers: {"Authorization": "Bearer " + sessionStorage.getItem("tokenUser")},
                     success: function () {
                     btn.closest('tr').fadeOut(300, function () {
                     $(this).remove();
@@ -565,6 +574,7 @@ Click nbfs://nbhost/SystemFileSystem/Templates/Other/html.html to edit this temp
                     type: "GET",
                             url: "http://localhost:8080/api/estado/estados/" + idPais,
                             datatype: "json",
+                            headers: {"Authorization": "Bearer " + sessionStorage.getItem("tokenUser")},
                             success: function (data, textStatus, jqXHR) {
                             $("#ddlEstado").prop("disabled", false);
                             $("#ddlEstado").empty();
@@ -585,6 +595,7 @@ Click nbfs://nbhost/SystemFileSystem/Templates/Other/html.html to edit this temp
             type: "GET",
                     url: "http://localhost:8080/api/municipio/municipios/" + idEstado,
                     datatype: "json",
+                    headers: {"Authorization": "Bearer " + sessionStorage.getItem("tokenUser")},
                     success: function (data, textStatus, jqXHR) {
                     $("#ddlMunicipio").prop("disabled", false)
                             $("#ddlMunicipio").empty();
@@ -605,6 +616,7 @@ Click nbfs://nbhost/SystemFileSystem/Templates/Other/html.html to edit this temp
             type: "GET",
                     url: "http://localhost:8080/api/colonia/colonias/" + idMunicipio,
                     datatype: "json",
+                    headers: {"Authorization": "Bearer " + sessionStorage.getItem("tokenUser")},
                     success: function (data, textStatus, jqXHR) {
                     $("#ddlColonia").prop("disabled", false)
                             $("#ddlColonia").empty();
@@ -625,6 +637,7 @@ Click nbfs://nbhost/SystemFileSystem/Templates/Other/html.html to edit this temp
             type: "GET",
                     url: "http://localhost:8080/api/colonia/colonias?" + nombreColonia + "&idMunicipio=" + idMunicipio,
                     datatype: "json",
+                    headers: {"Authorization": "Bearer " + sessionStorage.getItem("tokenUser")},
                     success: function (data, textStatus, jqXHR) {
                     $("#codigoPostal").val(data.object);
                     if (callback) callback();

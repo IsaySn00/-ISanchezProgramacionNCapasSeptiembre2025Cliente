@@ -77,15 +77,22 @@ public class UsuarioController {
     }
 
     @GetMapping("indexUsuario")
-    public String Index(Model model) {
+    public String Index(Model model, HttpSession session) {
 
         model.addAttribute("Usuario", new Usuario());
 
         RestTemplate restTemplate = new RestTemplate();
 
+        String tkn = (String) session.getAttribute("tokenUser");
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setBearerAuth(tkn);
+
+        HttpEntity<Void> entity = new HttpEntity<>(headers);
+
         ResponseEntity<Result<List<Usuario>>> responseEntity = restTemplate.exchange(urlBase + "/api/usuarios/usuario",
                 HttpMethod.GET,
-                HttpEntity.EMPTY,
+                entity,
                 new ParameterizedTypeReference<Result<List<Usuario>>>() {
         });
 
@@ -101,13 +108,15 @@ public class UsuarioController {
     }
 
     @PostMapping("indexUsuario")
-    public String Index(@ModelAttribute("Usuario") Usuario usuario, Model model) {
+    public String Index(@ModelAttribute("Usuario") Usuario usuario, Model model, HttpSession session) {
 
         model.addAttribute("Usuario", usuario);
+        String tkn = (String) session.getAttribute("tokenUser");
 
         RestTemplate restTemplate = new RestTemplate();
 
         HttpHeaders headers = new HttpHeaders();
+        headers.setBearerAuth(tkn);
         headers.setContentType(MediaType.APPLICATION_JSON);
 
         HttpEntity<Usuario> entity = new HttpEntity<>(usuario, headers);
@@ -162,7 +171,7 @@ public class UsuarioController {
             Integer idUsuario = (Integer) data.get("idUsuario");
             String tkn = data.get("token").toString();
 
-            session.setAttribute("tkn", tkn);
+            session.setAttribute("tokenUser", tkn);
 
             if (rol.equals("admin")) {
                 return "redirect:/usuario/indexUsuario";
@@ -190,11 +199,18 @@ public class UsuarioController {
         String tkn = session.getAttribute("tkn").toString();
         session.removeAttribute("tkn");
 
+        String tokenUsuario = (String) session.getAttribute("tokenUser");
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setBearerAuth(tokenUsuario);
+
+        HttpEntity<Void> entity = new HttpEntity<>(headers);
+
         RestTemplate restTemplate = new RestTemplate();
 
         ResponseEntity<Result> responseEntity = restTemplate.exchange(urlBase + "/api/usuarios/cargaMasiva?tkn=" + tkn,
                 HttpMethod.GET,
-                HttpEntity.EMPTY,
+                entity,
                 Result.class);
 
         if (responseEntity.getStatusCode().value() == 201) {
@@ -213,11 +229,14 @@ public class UsuarioController {
 
         RestTemplate restTemplate = new RestTemplate();
 
+        String tkn = (String) session.getAttribute("tokenUser");
+
         MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
 
         body.add("archivo", archivo.getResource());
 
         HttpHeaders headers = new HttpHeaders();
+        headers.setBearerAuth(tkn);
         headers.setContentType(MediaType.MULTIPART_FORM_DATA);
 
         HttpEntity<MultiValueMap<String, Object>> requestEntity = new HttpEntity<>(body, headers);
@@ -251,13 +270,13 @@ public class UsuarioController {
     @GetMapping("detail/{idUsuario}")
     public String Detail(@PathVariable("idUsuario") int idUsuario, Model model, HttpSession session) {
 
-        String token = (String) session.getAttribute("tkn");
-        
+        String token = (String) session.getAttribute("tokenUser");
+
         HttpHeaders headers = new HttpHeaders();
         headers.setBearerAuth(token);
-        
+
         HttpEntity<Void> entity = new HttpEntity<>(headers);
-        
+
         RestTemplate restTemplate = new RestTemplate();
 
         ResponseEntity<Result<Usuario>> responseEntity = restTemplate.exchange(urlBase + "/api/usuarios/usuario/" + idUsuario,
@@ -272,8 +291,8 @@ public class UsuarioController {
         }
 
         model.addAttribute("direccion", new Direccion());
-        model.addAttribute("roles", GetRoles().object);
-        model.addAttribute("paises", GetPaises().object);
+        model.addAttribute("roles", GetRoles(session).object);
+        model.addAttribute("paises", GetPaises(session).object);
 //        if (usuario.Direcciones.get(0).Colonia.Municipio.Estado.Pais.getIdPais() > 0) {
 //            model.addAttribute("estados", estadoJPADAOImplementation.GetAll(usuario.Direcciones.get(0).Colonia.Municipio.Estado.Pais.getIdPais()).objects);
 //            if (usuario.Direcciones.get(0).Colonia.Municipio.Estado.Pais.getIdPais() > 0) {
@@ -289,28 +308,35 @@ public class UsuarioController {
 //
 
     @GetMapping("add")
-    public String AddUsuarioView(Model model) {
+    public String AddUsuarioView(Model model, HttpSession session) {
 
         Usuario usuario = new Usuario();
 
         model.addAttribute("Usuario", usuario);
 
-        model.addAttribute("paises", GetPaises().object);
+        model.addAttribute("paises", GetPaises(session).object);
 
-        model.addAttribute("roles", GetRoles().object);
+        model.addAttribute("roles", GetRoles(session).object);
 
         return "UsuarioForm";
     }
 
-    public Result GetPaises() {
+    public Result GetPaises(HttpSession session) {
         RestTemplate restTemplate = new RestTemplate();
+
+        String tkn = (String) session.getAttribute("tokenUser");
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setBearerAuth(tkn);
+
+        HttpEntity<Void> entity = new HttpEntity<>(headers);
 
         Result resultPais = new Result();
 
         ResponseEntity<Result<List<Pais>>> responseEntityPais = restTemplate.exchange(
                 urlBase + "/api/pais/paises",
                 HttpMethod.GET,
-                HttpEntity.EMPTY,
+                entity,
                 new ParameterizedTypeReference<Result<List<Pais>>>() {
         });
 
@@ -321,15 +347,22 @@ public class UsuarioController {
         return resultPais;
     }
 
-    public Result GetEstados(int idPais) {
+    public Result GetEstados(int idPais, HttpSession session) {
         RestTemplate restTemplate = new RestTemplate();
 
         Result result = new Result();
 
+        String tkn = (String) session.getAttribute("tokenUser");
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setBearerAuth(tkn);
+
+        HttpEntity<Void> entity = new HttpEntity<>(headers);
+
         ResponseEntity<Result<List<Estado>>> responseEntity = restTemplate.exchange(
                 urlBase + "/api/estado/estados/" + idPais,
                 HttpMethod.GET,
-                HttpEntity.EMPTY,
+                entity,
                 new ParameterizedTypeReference<Result<List<Estado>>>() {
         });
 
@@ -340,15 +373,22 @@ public class UsuarioController {
         return result;
     }
 
-    public Result GetMunicipios(int idEstado) {
+    public Result GetMunicipios(int idEstado, HttpSession session) {
         RestTemplate restTemplate = new RestTemplate();
 
         Result result = new Result();
 
+        String tkn = (String) session.getAttribute("tokenUser");
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setBearerAuth(tkn);
+
+        HttpEntity<Void> entity = new HttpEntity<>(headers);
+
         ResponseEntity<Result<List<Municipio>>> responseEntity = restTemplate.exchange(
                 urlBase + "/api/municipio/municipios/" + idEstado,
                 HttpMethod.GET,
-                HttpEntity.EMPTY,
+                entity,
                 new ParameterizedTypeReference<Result<List<Municipio>>>() {
         });
 
@@ -359,15 +399,22 @@ public class UsuarioController {
         return result;
     }
 
-    public Result GetColonias(int idColonia) {
+    public Result GetColonias(int idColonia, HttpSession session) {
         RestTemplate restTemplate = new RestTemplate();
 
         Result result = new Result();
 
+        String tkn = (String) session.getAttribute("tokenUser");
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setBearerAuth(tkn);
+
+        HttpEntity<Void> entity = new HttpEntity<>(headers);
+
         ResponseEntity<Result<List<Colonia>>> responseEntity = restTemplate.exchange(
                 urlBase + "/api/colonia/colonias/" + idColonia,
                 HttpMethod.GET,
-                HttpEntity.EMPTY,
+                entity,
                 new ParameterizedTypeReference<Result<List<Colonia>>>() {
         });
 
@@ -378,15 +425,22 @@ public class UsuarioController {
         return result;
     }
 
-    public Result GetRoles() {
+    public Result GetRoles(HttpSession session) {
         RestTemplate restTemplate = new RestTemplate();
 
         Result resultRol = new Result();
 
+        String tkn = (String) session.getAttribute("tokenUser");
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setBearerAuth(tkn);
+
+        HttpEntity<Void> entity = new HttpEntity<>(headers);
+
         ResponseEntity<Result<List<Rol>>> responseEntityRol = restTemplate.exchange(
                 urlBase + "/api/rol/roles",
                 HttpMethod.GET,
-                HttpEntity.EMPTY,
+                entity,
                 new ParameterizedTypeReference<Result<List<Rol>>>() {
         });
 
@@ -400,11 +454,13 @@ public class UsuarioController {
     @PostMapping("add")
     public String addUsuario(@Valid @ModelAttribute("Usuario") Usuario usuario,
             BindingResult bindingResult, RedirectAttributes redirectAttributes,
-            Model model, @RequestParam("imagenFile") MultipartFile imagenFile) throws JsonProcessingException {
+            Model model, @RequestParam("imagenFile") MultipartFile imagenFile, HttpSession session) throws JsonProcessingException {
 
         RestTemplate restTemplate = new RestTemplate();
 
         MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
+
+        String tkn = (String) session.getAttribute("tokenUser");
 
         HttpHeaders jsonHeaders = new HttpHeaders();
 
@@ -434,6 +490,7 @@ public class UsuarioController {
 
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.MULTIPART_FORM_DATA);
+        headers.setBearerAuth(tkn);
 
         HttpEntity<MultiValueMap<String, Object>> requestEntity = new HttpEntity<>(body, headers);
 
@@ -461,14 +518,14 @@ public class UsuarioController {
             model.addAttribute("error", result.object);
 
             model.addAttribute("Usuario", usuario);
-            model.addAttribute("roles", GetRoles().object);
-            model.addAttribute("paises", GetPaises().object);
+            model.addAttribute("roles", GetRoles(session).object);
+            model.addAttribute("paises", GetPaises(session).object);
             if (usuario.Direcciones.get(0).Colonia.Municipio.Estado.Pais.getIdPais() > 0) {
-                model.addAttribute("estados", GetEstados(usuario.Direcciones.get(0).Colonia.Municipio.Estado.Pais.getIdPais()).object);
+                model.addAttribute("estados", GetEstados(usuario.Direcciones.get(0).Colonia.Municipio.Estado.Pais.getIdPais(), session).object);
                 if (usuario.Direcciones.get(0).Colonia.Municipio.Estado.Pais.getIdPais() > 0) {
-                    model.addAttribute("municipios", GetMunicipios(usuario.Direcciones.get(0).Colonia.Municipio.Estado.getIdEstado()).object);
+                    model.addAttribute("municipios", GetMunicipios(usuario.Direcciones.get(0).Colonia.Municipio.Estado.getIdEstado(), session).object);
                     if (usuario.Direcciones.get(0).Colonia.Municipio.Estado.getIdEstado() > 0) {
-                        model.addAttribute("colonias", GetColonias(usuario.Direcciones.get(0).Colonia.Municipio.getIdMunicipio()).object);
+                        model.addAttribute("colonias", GetColonias(usuario.Direcciones.get(0).Colonia.Municipio.getIdMunicipio(), session).object);
                     }
                 }
             }
@@ -489,12 +546,15 @@ public class UsuarioController {
 
     @PutMapping("/detail")
     public String updateUsuario(@ModelAttribute("usuario") Usuario usuario, Model model,
-            RedirectAttributes redirectAttributes) {
+            RedirectAttributes redirectAttributes, HttpSession session) {
 
         RestTemplate restTemplate = new RestTemplate();
 
+        String tkn = (String) session.getAttribute("tokenUser");
+
         HttpHeaders httpHeaders = new HttpHeaders();
         httpHeaders.setContentType(MediaType.APPLICATION_JSON);
+        httpHeaders.setBearerAuth(tkn);
 
         HttpEntity<Usuario> request = new HttpEntity<>(usuario, httpHeaders);
 
@@ -523,7 +583,7 @@ public class UsuarioController {
 
             redirectAttributes.addFlashAttribute("usuario", usuario);
 
-            redirectAttributes.addFlashAttribute("roles", GetRoles().object);
+            redirectAttributes.addFlashAttribute("roles", GetRoles(session).object);
 
             return "redirect:/usuario/detail/" + usuario.getIdUsuario();
         }
@@ -541,9 +601,11 @@ public class UsuarioController {
     @PatchMapping("updateImgUsuario")
     public String UpdateImgUsuario(@ModelAttribute("usuario") Usuario usuario,
             RedirectAttributes redirectAttributes,
-            @RequestParam("imagenFile") MultipartFile imagenFile) {
+            @RequestParam("imagenFile") MultipartFile imagenFile, HttpSession session) {
 
         RestTemplate restTemplate = new RestTemplate();
+
+        String tkn = (String) session.getAttribute("tokenUser");
 
         restTemplate.setRequestFactory(new HttpComponentsClientHttpRequestFactory());
 
@@ -577,6 +639,7 @@ public class UsuarioController {
 
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.MULTIPART_FORM_DATA);
+        headers.setBearerAuth(tkn);
 
         HttpEntity<MultiValueMap<String, Object>> requestEntity = new HttpEntity<>(body, headers);
 
@@ -615,15 +678,18 @@ public class UsuarioController {
     @PostMapping("actionDireccion/{idUsuario}")
     public String ActionDireccion(@ModelAttribute("Direccion") Direccion direccion,
             @PathVariable int idUsuario,
-            RedirectAttributes redirectAttributes) {
+            RedirectAttributes redirectAttributes, HttpSession session) {
 
         RestTemplate restTemplate = new RestTemplate();
+
+        String tkn = (String) session.getAttribute("tokenUser");
 
         MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
 
         HttpHeaders jsonHeaders = new HttpHeaders();
 
         jsonHeaders.setContentType(MediaType.APPLICATION_JSON);
+        jsonHeaders.setBearerAuth(tkn);
 
         HttpEntity<Direccion> direccionEntity = new HttpEntity<>(direccion, jsonHeaders);
 
