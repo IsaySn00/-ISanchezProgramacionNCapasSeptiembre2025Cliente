@@ -16,11 +16,39 @@ Click nbfs://nbhost/SystemFileSystem/Templates/Other/html.html to edit this temp
         <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     </head>
     <body>
+        <script th:inline="javascript">
+
+
+
+            $(document).ready(function () {
+            let token = /*[[${session.tokenUser}]]*/ '';
+                    sessionStorage.setItem("tokenUser", token);
+                    $(".logout").on('click', function () {
+            $.ajax({
+            type: 'POST',
+                    url: "http://localhost:8080/api/auth/logout",
+                    headers: {
+                    "Authorization": "Bearer " + sessionStorage.getItem("tokenUser")
+                    },
+                    success: function (data){
+                    sessionStorage.removeItem("tokenUser");
+                    window.location.replace("/usuario/login");
+                    },
+                    error: function (data){
+                    console.log("Error al cerrar sesión");
+                    }
+            });
+            })
+                    })
+
+
+        </script>
         <div class="row">
             <header class="col bg-dark bg-gradient">
                 <nav class="navbar">
                     <div class="container-fluid col-7 col-sm-10">
                         <span class="navbar-brand mb-0 h1 text-light"><h2>Usuarios</h2></span>
+                        <button class="btn btn-danger logout" type="submit"><i class="bi bi-box-arrow-in-left"></i> Cerrar Sesión</button>
                     </div>
                 </nav>
             </header>
