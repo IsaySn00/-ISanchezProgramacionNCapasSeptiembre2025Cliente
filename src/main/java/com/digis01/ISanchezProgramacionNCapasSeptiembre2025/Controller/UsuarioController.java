@@ -72,7 +72,14 @@ public class UsuarioController {
     private static final String urlBase = "http://localhost:8080";
 
     @GetMapping("formularioUsuario")
-    public String FormularioUsuario() {
+    public String FormularioUsuario(HttpSession session) {
+        
+        String role = (String) session.getAttribute("role");
+        
+        if(!"admin".equals(role)){
+            return "ForbiddenPage";
+        }
+        
         return "UsuarioForm";
     }
 
@@ -80,6 +87,12 @@ public class UsuarioController {
     public String Index(Model model, HttpSession session) {
 
         model.addAttribute("Usuario", new Usuario());
+        
+        String role = (String) session.getAttribute("role");
+        
+        if(!"admin".equals(role)){
+            return "ForbiddenPage";
+        }
 
         RestTemplate restTemplate = new RestTemplate();
 
@@ -112,6 +125,12 @@ public class UsuarioController {
 
         model.addAttribute("Usuario", usuario);
         String tkn = (String) session.getAttribute("tokenUser");
+        
+        String role = (String) session.getAttribute("role");
+        
+        if(!"admin".equals(role)){
+            return "ForbiddenPage";
+        }
 
         RestTemplate restTemplate = new RestTemplate();
 
@@ -172,6 +191,7 @@ public class UsuarioController {
             String tkn = data.get("token").toString();
 
             session.setAttribute("tokenUser", tkn);
+            session.setAttribute("role", rol);
 
             if (rol.equals("admin")) {
                 return "redirect:/usuario/indexUsuario";
@@ -189,7 +209,14 @@ public class UsuarioController {
     }
     
     @GetMapping("cargaMasiva")
-    public String CargaMasiva() {
+    public String CargaMasiva(HttpSession session) {
+        
+        String role = (String) session.getAttribute("role");
+        
+        if(!"admin".equals(role)){
+            return "ForbiddenPage";
+        }
+        
         return "UsuarioCargaMasiva";
     }
 
@@ -198,6 +225,12 @@ public class UsuarioController {
 
         String tkn = session.getAttribute("tkn").toString();
         session.removeAttribute("tkn");
+        
+        String role = (String) session.getAttribute("role");
+        
+        if(!"admin".equals(role)){
+            return "ForbiddenPage";
+        }
 
         String tokenUsuario = (String) session.getAttribute("tokenUser");
 
@@ -311,6 +344,12 @@ public class UsuarioController {
     public String AddUsuarioView(Model model, HttpSession session) {
 
         Usuario usuario = new Usuario();
+        
+        String role = (String) session.getAttribute("role");
+        
+        if(!"admin".equals(role)){
+            return "ForbiddenPage";
+        }
 
         model.addAttribute("Usuario", usuario);
 
