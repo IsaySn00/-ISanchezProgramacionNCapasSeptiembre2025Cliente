@@ -163,11 +163,11 @@ public class UsuarioController {
     }
 
     @PostMapping("login")
-    public String Login(@RequestParam("username") String username, @RequestParam("password") String password, Model model, HttpSession session) {
+    public String Login(@RequestParam("email") String email, @RequestParam("password") String password, Model model, HttpSession session) {
 
         try {
             Usuario usuario = new Usuario();
-            usuario.setUserName(username);
+            usuario.setEmailUsuario(email);
             usuario.setPasswordUser(password);
 
             RestTemplate restTemplate = new RestTemplate();
@@ -183,7 +183,7 @@ public class UsuarioController {
                     usuarioEntity,
                     new ParameterizedTypeReference<Result<Map<String, Object>>>() {
             });
-
+            
             Map<String, Object> data = responseEntity.getBody().object;
 
             String rol = data.get("rol").toString();
@@ -193,7 +193,7 @@ public class UsuarioController {
             session.setAttribute("tokenUser", tkn);
             session.setAttribute("role", rol);
 
-            if (rol.equals("admin")) {
+               if (rol.equals("admin")) {
                 return "redirect:/usuario/indexUsuario";
             } else if (rol.equals("usuario")) {
                 return "redirect:/usuario/detail/" + idUsuario;

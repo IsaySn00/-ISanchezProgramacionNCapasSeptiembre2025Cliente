@@ -21,10 +21,11 @@ Click nbfs://nbhost/SystemFileSystem/Templates/Other/html.html to edit this temp
                 <div th:if="${loginError}" class="card bg-danger w-50 my-3 mx-auto">
                     <p class="text-center fs-5 text-light">Error al iniciar sesión</p>
                 </div>        
+                        
                 <form class="container row" th:action="@{login}" method="post">
                     <div class="mb-3 col-12">
-                        <label for="userName" class="form-label fs-5 mb-2">Nombre de Usuario</label>
-                        <input type="text" id="userName" name="username" class="form-control"/>    
+                        <label for="userName" class="form-label fs-5 mb-2">Correo electrónico    </label>
+                        <input type="text" id="emailUsuario" name="email" class="form-control"/>    
                     </div>
                     <div class="mb-5 col-12">
                         <label for="passwordUser" class="form-label fs-5 mb-2">Contraseña</label>
