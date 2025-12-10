@@ -198,7 +198,14 @@ public class UsuarioController {
             } else if (rol.equals("usuario")) {
                 return "redirect:/usuario/detail/" + idUsuario;
             }
-        } catch (Exception ex) {
+        } catch (HttpClientErrorException ex) {
+            
+            if(ex.getStatusCode().value() == 403){
+                model.addAttribute("unverified", true);
+                model.addAttribute("email", email);
+                return "login";
+            }
+            
             model.addAttribute("loginError", true);
             return "redirect:/usuario/login";
         }
