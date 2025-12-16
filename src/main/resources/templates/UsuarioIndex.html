@@ -1,4 +1,4 @@
-    <!DOCTYPE html>
+<!DOCTYPE html>
 <!--
 Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
 Click nbfs://nbhost/SystemFileSystem/Templates/Other/html.html to edit this template
@@ -37,6 +37,7 @@ Click nbfs://nbhost/SystemFileSystem/Templates/Other/html.html to edit this temp
             $.ajax({
             type: 'DELETE',
                     url: `http://localhost:8080/api/usuarios/deleteUsuario/${idUsuario}`,
+                    headers: {"Authorization": "Bearer " + sessionStorage.getItem("tokenUser")},
                     success: function () {
                     btn.closest('tr').fadeOut(300, function () {
                     $(this).remove();
@@ -64,6 +65,7 @@ Click nbfs://nbhost/SystemFileSystem/Templates/Other/html.html to edit this temp
             $.ajax({
             type: 'PATCH',
                     url: `http://localhost:8080/api/usuarios/usuario/${idUsuario}/bajaLogica?status=${statusUsuario}`,
+                    headers: {"Authorization": "Bearer " + sessionStorage.getItem("tokenUser")},
                     success: function() {
                     Swal.fire({
                     title: "El usuario ha cambiado de estatus",
@@ -127,7 +129,7 @@ Click nbfs://nbhost/SystemFileSystem/Templates/Other/html.html to edit this temp
                                 <th scope="col">Nombre Completo</th>
                                 <th scope="col">Contacto</th>
                                 <th scope="col">Direcciones</th>
-<!--                                <th scope="col">Estatus</th>-->
+                                <!--                                <th scope="col">Estatus</th>-->
                                 <th scope="col">Acciones</th>
                             </tr>
                         </thead>
@@ -162,9 +164,9 @@ Click nbfs://nbhost/SystemFileSystem/Templates/Other/html.html to edit this temp
                                         </ul>                                    
                                     </div>
                                 </td>
-<!--                                <td>
-                                    <p id="statusUsuario" th:text="${usuario.statusUsuario == 1 ? 'Activo' : 'Inactivo'}"></p>
-                                </td>-->
+                                <!--                                <td>
+                                                                    <p id="statusUsuario" th:text="${usuario.statusUsuario == 1 ? 'Activo' : 'Inactivo'}"></p>
+                                                                </td>-->
                                 <td>
                                     <button class="btn btn-danger btnEliminarUsuario" th:attr="data-id=${usuario.idUsuario}"><i class="bi bi-trash-fill"></i></button>
                                     <a class="btn btn-primary" th:href="@{|detail/${usuario.idUsuario}|}"><i class="bi bi-eye-fill"></i></a>

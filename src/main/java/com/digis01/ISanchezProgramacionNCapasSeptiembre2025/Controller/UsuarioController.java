@@ -215,6 +215,16 @@ public class UsuarioController {
 
     }
     
+    @GetMapping("verificadoExitoso")
+    public String VerificadoExitoso(){
+        return "VerificadoExitoso";
+    }
+    
+    @GetMapping("verificadoError")
+    public String VerificadoError(){
+        return "VerificadoError";
+    }
+    
     @GetMapping("cargaMasiva")
     public String CargaMasiva(HttpSession session) {
         

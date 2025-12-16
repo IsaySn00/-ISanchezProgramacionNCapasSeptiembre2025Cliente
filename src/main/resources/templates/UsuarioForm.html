@@ -23,6 +23,7 @@ Click nbfs://nbhost/SystemFileSystem/Templates/Other/html.html to edit this temp
                     $.ajax({
                         type: "GET",
                         url: "http://localhost:8080/api/estado/estados/" + $("#ddlPais").val(),
+                        headers: {"Authorization": "Bearer " + sessionStorage.getItem("tokenUser")},
                         datatype: "json",
                         success: function (data, textStatus, jqXHR) {
                             $("#ddlEstado").prop("disabled", false)
@@ -46,6 +47,7 @@ Click nbfs://nbhost/SystemFileSystem/Templates/Other/html.html to edit this temp
                     $.ajax({
                         type: "GET",
                         url: "http://localhost:8080/api/municipio/municipios/" + $("#ddlEstado").val(),
+                        headers: {"Authorization": "Bearer " + sessionStorage.getItem("tokenUser")},
                         datatype: "json",
                         success: function (data, textStatus, jqXHR) {
                             $("#ddlMunicipio").prop("disabled", false)
@@ -67,6 +69,7 @@ Click nbfs://nbhost/SystemFileSystem/Templates/Other/html.html to edit this temp
                     $.ajax({
                         type: "GET",
                         url: "http://localhost:8080/api/colonia/colonias/" + $("#ddlMunicipio").val(),
+                        headers: {"Authorization": "Bearer " + sessionStorage.getItem("tokenUser")},
                         datatype: "json",
                         success: function (data, textStatus, jqXHR) {
                             $("#ddlColonia").prop("disabled", false)
@@ -87,6 +90,7 @@ Click nbfs://nbhost/SystemFileSystem/Templates/Other/html.html to edit this temp
                     $.ajax({
                         type: "GET",
                         url: "http://localhost:8080/api/colonia/colonias?" + "nombreColonia=" + $("#ddlColonia option:selected").text() + "&idMunicipio=" + $("#ddlMunicipio").val(),
+                        headers: {"Authorization": "Bearer " + sessionStorage.getItem("tokenUser")},
                         datatype: "json",
                         success: function (data, textStatus, jqXHR) {
                             console.log(data);
@@ -103,6 +107,7 @@ Click nbfs://nbhost/SystemFileSystem/Templates/Other/html.html to edit this temp
                     $.ajax({
                         type: "GET",
                         url: "/usuario/direccion/" + $("#codigoPostal").val(),
+                        headers: {"Authorization": "Bearer " + sessionStorage.getItem("tokenUser")},
                         datatype: "json",
                         success: function (data, textStatus, jqXHR) {
                             $("#ddlPais").prop("disabled", true);
