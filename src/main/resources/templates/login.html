@@ -34,6 +34,37 @@ Click nbfs://nbhost/SystemFileSystem/Templates/Other/html.html to edit this temp
                             <button type="submit" class="btn btn-primary btn-lg mx-auto col-3">Iniciar Sesión</button>                    
                         </form>        
                         </div>
+                        <p class="text-center mt-3">
+                            <a href="#" class="link-primary" data-bs-toggle="modal" data-bs-target="#modalRecuperar">
+                                Recuperar Contraseña
+                            </a>
+                        </p>
+
+                        </div>
+                        <div class="modal fade" id="modalRecuperar" tabindex="-1" aria-hidden="true">
+                            <div class="modal-dialog modal-dialog-centered">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h5 class="modal-title">Recuperar contraseña</h5>
+                                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                    </div>
+
+                                    <div class="modal-body">
+                                        <div class="mb-3">
+                                            <label class="form-label">Correo electrónico</label>
+                                            <input type="email" id="emailRecuperacion" class="form-control"
+                                                   placeholder="correo@ejemplo.com">
+                                        </div>
+                                    </div>
+
+                                    <div class="modal-footer">
+                                        <button class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                                        <button class="btn btn-primary" onclick="enviarCorreoRecuperacion()">
+                                            Enviar correo
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                         <div th:if="${unverified}">
                             <script th:inline="javascript">
@@ -64,5 +95,39 @@ Click nbfs://nbhost/SystemFileSystem/Templates/Other/html.html to edit this temp
                                 }
                             </script>
                         </div>
+                        <script>
+                            function enviarCorreoRecuperacion() {
+                                const email = $("#emailRecuperacion").val().trim();
+
+                                if (email === "") {
+                                    Swal.fire("Error", "Ingresa un correo", "warning");
+                                    return;
+                                }
+
+                                let formData = new FormData();
+                                formData.append("email", email);
+
+                                $.ajax({
+                                    url: "http://localhost:8080/api/usuarios/enviarCorreoPassword",
+                                    type: "POST",
+                                    data: formData,
+                                    processData: false,
+                                    contentType: false,
+                                    success: function (resp) {
+                                        Swal.fire("Éxito", resp.object, "success");
+                                        $("#modalRecuperar").modal("hide");
+                                        $("#emailRecuperacion").val("");
+                                    },
+                                    error: function (xhr) {
+                                        let mensaje = "Ocurrió un error";
+                                        if (xhr.responseJSON?.object) {
+                                            mensaje = xhr.responseJSON.object;
+                                        }
+                                        Swal.fire("Error", mensaje, "error");
+                                    }
+                                });
+                            }
+                        </script>
+
                         </body>
                         </html>

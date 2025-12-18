@@ -781,4 +781,9 @@ public class UsuarioController {
 
         return "redirect:/usuario/detail/" + idUsuario;
     }
+    
+    @GetMapping("recuperacionContrasenia")
+    public String RecuperarPassword(@RequestParam(value = "token", required = true) String token){
+        return "NewPassword";
+    }
 }
