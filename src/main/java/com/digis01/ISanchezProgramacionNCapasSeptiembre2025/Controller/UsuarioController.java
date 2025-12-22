@@ -786,4 +786,9 @@ public class UsuarioController {
     public String RecuperarPassword(@RequestParam(value = "token", required = true) String token){
         return "NewPassword";
     }
+    
+    @GetMapping("cambioContrasenia")
+    public String CambioPassword(){
+        return "cambiarPassword";
+    }
 }
