@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<!--
+Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
+Click nbfs://nbhost/SystemFileSystem/Templates/Other/html.html to edit this template
+-->
+<html xmlns:th="http://www.thymeleaf.org">
+    <head>
+        <title>TODO supply a title</title>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous"></script>
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
+        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    </head>
+    <body>
+        <div class="container text-center mt-5">
+            <h3 id="title">Revisa tu correo</h3>
+            <p id="desc">Estamos esperando a que verifiques tu cuenta</p>
+            <div class="spinner-border text-primary" role="status" id="spinner">
+                <span class="visually-hidden">Loading...</span>
+            </div>
+
+            <div id="verifiedSuccess" class="d-none mt-4">
+                <h4 class="text-success">Cuenta verificada</h4>
+                <p>Ya puedes iniciar sesión</p>
+                <a th:href="@{login}" class="btn btn-success mt-2">Ir al login</a>
+            </div>
+        </div>
+
+        <script th:inline="javascript">
+
+            const email = /*[[${email}]]*/ '';
+
+            const interval = setInterval(() => {
+                $.ajax({
+                    url: "http://localhost:8080/api/auth/estadoVerificacion?email=" + email,
+                    method: "GET",
+                    success: function (resp) {
+                        if (resp.object == 1) {
+                            clearInterval(interval);
+
+                            $("#spinner").fadeOut();
+                            $("#title").hide();
+                            $("#desc").hide();
+
+                            $("#verifiedSuccess").removeClass("d-none").hide().fadeIn();
+                        }
+                    },
+                    error: function () {
+                        Swal.fire({icon: "error", text: "Algo salio mal al verificar la cuenta"});
+                    }
+                });
+            }, 3000);
+        </script>
+    </body>
+</html>

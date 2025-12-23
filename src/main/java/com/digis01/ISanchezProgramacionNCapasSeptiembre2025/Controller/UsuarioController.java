@@ -201,9 +201,8 @@ public class UsuarioController {
         } catch (HttpClientErrorException ex) {
             
             if(ex.getStatusCode().value() == 403){
-                model.addAttribute("unverified", true);
                 model.addAttribute("email", email);
-                return "login";
+                return "redirect:/usuario/verificacion-pendiente?email=" + email;
             }
             
             model.addAttribute("loginError", true);
@@ -790,5 +789,11 @@ public class UsuarioController {
     @GetMapping("cambioContrasenia")
     public String CambioPassword(){
         return "cambiarPassword";
+    }
+    
+    @GetMapping("/verificacion-pendiente")
+    public String verifiacionPendiente(@RequestParam String email, Model model){
+        model.addAttribute("email", email);
+        return "cuentaPendiente";
     }
 }
